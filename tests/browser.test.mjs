@@ -38,7 +38,7 @@ test('live lift set changes survive navigation and are not automatically complet
  const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  await page.clock.install({time:new Date('2026-10-12T15:00:00-04:00')});
  await page.goto(base+'/',{waitUntil:'networkidle'});
- await page.getByRole('button',{name:'Start session'}).click();
+ await page.getByRole('button',{name:'Start workout'}).click();
  await page.locator('input[data-e="0"][data-s="0"][data-k="weight"]').fill('25');
  await page.locator('input[data-e="0"][data-s="0"][data-k="reps"]').fill('5');
  await page.locator('input[data-e="0"][data-s="0"][data-k="done"]').check();
@@ -74,7 +74,8 @@ test('rest timer is visible, offers 60s, and survives navigating away',async()=>
  assert.equal(await page.locator('#tlg-clock').innerText(),'1:00');
  await page.getByRole('button',{name:'60 sec'}).click();
  await page.locator('#tlg-pause').click();
- await page.clock.runFor(1100);
+ await page.clock.resume();
+ await page.waitForTimeout(1400);
  assert.match(await page.locator('#tlg-clock').innerText(),/^0:5[89]$/);
  assert.deepEqual(errors,[]);
  await page.close();
