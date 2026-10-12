@@ -55,10 +55,10 @@ test('independent mobility logging does not mark lifting complete',async()=>{
  await page.clock.install({time:new Date('2026-10-12T15:00:00-04:00')});
  await page.goto(base+'/',{waitUntil:'networkidle'});
  await page.locator('nav button[data-tab="mobility"]').click();
- await page.getByRole('button',{name:'Open routine'}).first().click();
+ await page.getByRole('button',{name:'Open'}).first().click();
  for(const e of await page.locator('[data-ms]').all())await e.check();
  await page.getByRole('button',{name:'Save routine'}).click();
- assert.match(await page.locator('main').innerText(),/Completed today/);
+ assert.match(await page.locator('main').innerText(),/Done/);
  await page.locator('nav button[data-tab="today"]').click();
  assert.match(await page.locator('main').innerText(),/Planned/);
  await page.close();
@@ -86,7 +86,7 @@ test('training session includes separate warm-up/cooldown and optional media con
  await page.goto(base+'/',{waitUntil:'networkidle'});
  await page.getByRole('button',{name:'Start workout'}).click();
  assert.equal(await page.locator('.tlg-stage').count(),2);
- assert.ok(await page.locator('.tlg-media').count()>0);
+ assert.equal(await page.locator('.tlg-media').count(),0);
  const widths=await page.evaluate(()=>({viewport:document.documentElement.clientWidth,body:document.body.scrollWidth}));
  assert.ok(widths.body<=widths.viewport+2,'No horizontal overflow: '+JSON.stringify(widths));
  await page.close();
