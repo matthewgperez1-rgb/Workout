@@ -33,7 +33,7 @@ async function getExerciseInfo(name){
   return match||null;
 }
 window.trainingPhoto = async (btn,name)=>{
- const holder=btn.parentElement.querySelector('.tlg-photo-wrap');
+ const holder=btn.parentElement.querySelector('.tlg-photo-wrap')||btn.nextElementSibling;
  if(!holder)return;
  if(holder.dataset.open==='yes'){holder.replaceChildren();holder.dataset.open='no';return}
  holder.textContent='Loading reference…';
@@ -71,7 +71,7 @@ sessionEditor=function(date){
    const button=document.createElement('button');button.className='tlg-media';button.type='button';button.textContent='View photo (optional)';
    button.addEventListener('click',()=>window.trainingPhoto(button,name));
    const wrap=document.createElement('div');wrap.className='tlg-photo-wrap';
-   node.querySelector('.movement-info')?.after(button,wrap) || node.append(button,wrap);
+   node.append(button,wrap);
  });
  const pDate=new Date(date+'T12:00:00'),weekday=pDate.getDay();
  const prep=warm[weekday]||[['Easy cardio','3 min'],['Practice first movement','2 light sets']];
