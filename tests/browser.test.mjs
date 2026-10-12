@@ -45,7 +45,7 @@ test('live lift set changes survive navigation and are not automatically complet
  await page.locator('nav button[data-tab="history"]').click();
  await page.locator('nav button[data-tab="today"]').click();
  assert.match(await page.locator('main').innerText(),/In progress/);
- await page.getByRole('button',{name:'Continue / review workout'}).click();
+ await page.getByRole('button',{name:'Continue workout'}).click();
  assert.equal(await page.locator('input[data-e="0"][data-s="0"][data-k="weight"]').inputValue(),'25');
  assert.equal(await page.locator('input[data-e="0"][data-s="0"][data-k="done"]').isChecked(),true);
  await page.close();
@@ -60,7 +60,7 @@ test('independent mobility logging does not mark lifting complete',async()=>{
  await page.getByRole('button',{name:'Save routine'}).click();
  assert.match(await page.locator('main').innerText(),/Done/);
  await page.locator('nav button[data-tab="today"]').click();
- assert.match(await page.locator('main').innerText(),/Planned/);
+ assert.match(await page.locator('main').innerText(),/Scheduled/);
  await page.close();
 });
 
