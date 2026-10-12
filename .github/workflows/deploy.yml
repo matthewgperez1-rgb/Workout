@@ -31,7 +31,7 @@ jobs:
       - name: Build static distribution
         run: |
           mkdir -p dist
-          cp index.html manifest.webmanifest fixes.css v3.css enhancements.js training-core.mjs sw.js icon.svg v4.js v4.css v5.js v5.css v6.js v6.css dist/
+          cp index.html manifest.webmanifest fixes.css v3.css enhancements.js training-core.mjs sw.js icon.svg v4.js v4.css v5.js v5.css v6.js v6.css v7.js v7.css dist/
           test -s dist/index.html
       - uses: actions/upload-pages-artifact@v4
         with:
