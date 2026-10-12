@@ -47,6 +47,17 @@ function substitute(exIndex) {
  saveActive();sessionEditor(window.editSession.date);
 }
 window.substitute=substitute;
+const existingTemplate=tempSession;
+tempSession=function(date){
+ const item=existingTemplate(date);
+ if(db.lifts.some(l=>l.date===date))return item;
+ const w=window.trainingCore?.trainingWeek(date);
+ if(w&&w%4===0){
+  item.exercises=item.exercises.map(e=>({...e,sets:e.sets.slice(0,Math.max(1,Math.ceil(e.sets.length*0.65)))}));
+  item.notes=(item.notes||'')+'Reduced-volume week: move well, avoid grinding reps.';
+ }
+ return item;
+};
 const oldEditor=sessionEditor;
 sessionEditor=function(date){
  oldEditor(date);
