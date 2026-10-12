@@ -38,7 +38,7 @@ jobs:
           const match=html.match(/<script>([\s\S]*?)<\/script>/);
           if(!match)throw Error('Missing application script');
           new vm.Script(match[1],{filename:'index.html embedded JS'});
-          for(const p of ['manifest.webmanifest','fixes.css','v3.css','training-core.mjs','enhancements.js','sw.js']) if(!fs.existsSync(p))throw Error('Missing '+p);
+          for(const p of ['manifest.webmanifest','fixes.css','v3.css','training-core.mjs','enhancements.js','sw.js','icon.svg']) if(!fs.existsSync(p))throw Error('Missing '+p);
           JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
           if (!html.includes('src="enhancements.js"')) throw Error('Enhancement bundle not loaded');
           if (!html.includes('name="viewport"')) throw Error('Missing mobile viewport');
