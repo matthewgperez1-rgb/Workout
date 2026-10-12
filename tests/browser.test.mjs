@@ -63,3 +63,30 @@ test('independent mobility logging does not mark lifting complete',async()=>{
  assert.match(await page.locator('main').innerText(),/Planned/);
  await page.close();
 });
+
+test('rest timer is visible, offers 60s, and survives navigating away',async()=>{
+ const page=await browser.newPage({viewport:{width:375,height:812},isMobile:true,hasTouch:true});
+ await page.clock.install({time:new Date('2026-10-12T15:00:00-04:00')});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(base+'/',{waitUntil:'networkidle'});
+ await page.getByRole('button',{name:'Start workout'}).click();
+ await page.locator('#tlg-rest-timer').waitFor();
+ assert.equal(await page.locator('#tlg-clock').innerText(),'1:00');
+ await page.getByRole('button',{name:'60 sec'}).click();
+ await page.locator('#tlg-pause').click();
+ await page.clock.runFor(1100);
+ assert.match(await page.locator('#tlg-clock').innerText(),/^0:5[89]$/);
+ assert.deepEqual(errors,[]);
+ await page.close();
+});
+test('training session includes separate warm-up/cooldown and optional media controls',async()=>{
+ const page=await browser.newPage({viewport:{width:375,height:812},isMobile:true,hasTouch:true});
+ await page.clock.install({time:new Date('2026-10-12T15:00:00-04:00')});
+ await page.goto(base+'/',{waitUntil:'networkidle'});
+ await page.getByRole('button',{name:'Start workout'}).click();
+ assert.equal(await page.locator('.tlg-stage').count(),2);
+ assert.ok(await page.locator('.tlg-media').count()>0);
+ const widths=await page.evaluate(()=>({viewport:document.documentElement.clientWidth,body:document.body.scrollWidth}));
+ assert.ok(widths.body<=widths.viewport+2,'No horizontal overflow: '+JSON.stringify(widths));
+ await page.close();
+});
