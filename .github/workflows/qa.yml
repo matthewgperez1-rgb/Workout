@@ -23,7 +23,9 @@ jobs:
       - name: Validate JavaScript syntax and regression tests
         run: |
           node --check tests/domain.test.mjs
-          node --test tests/domain.test.mjs
+          node --check training-core.mjs
+          node --check tests/training-core.test.mjs
+          node --test tests/*.test.mjs
       - name: Validate app assets and embedded JavaScript
         run: |
           node --input-type=module <<'NODE'
@@ -33,7 +35,7 @@ jobs:
           const match=html.match(/<script>([\s\S]*?)<\/script>/);
           if(!match)throw Error('Missing application script');
           new vm.Script(match[1],{filename:'index.html embedded JS'});
-          for(const p of ['manifest.webmanifest','fixes.css','v3.css']) if(!fs.existsSync(p))throw Error('Missing '+p);
+          for(const p of ['manifest.webmanifest','fixes.css','v3.css','training-core.mjs']) if(!fs.existsSync(p))throw Error('Missing '+p);
           JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
           console.log('App syntax and required assets validated');
           NODE
