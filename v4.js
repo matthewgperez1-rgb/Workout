@@ -128,7 +128,7 @@ window.tlgTimerMount=(node)=>{
   if(until!==null){remaining=Math.max(0,Math.ceil((until-Date.now())/1000));until=null;}
   else {if(remaining===0)remaining=duration;until=Date.now()+remaining*1000;}
   updateTimer();
- }));
+ });
  node.querySelector('#tlg-reset').addEventListener('click',()=>{until=null;remaining=duration;updateTimer()});
  node.querySelectorAll('[data-time]').forEach(b=>b.classList.toggle('selected',Number(b.dataset.time)===duration));
  updateTimer();if(interval)clearInterval(interval);interval=setInterval(updateTimer,250);
