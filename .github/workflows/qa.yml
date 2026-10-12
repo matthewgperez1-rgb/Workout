@@ -1,0 +1,39 @@
+name: Training Log QA
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax and regression tests
+        run: |
+          node --check tests/domain.test.mjs
+          node --test tests/domain.test.mjs
+      - name: Validate app assets and embedded JavaScript
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import vm from 'node:vm';
+          const html=fs.readFileSync('index.html','utf8');
+          const match=html.match(/<script>([\s\S]*?)<\/script>/);
+          if(!match)throw Error('Missing application script');
+          new vm.Script(match[1],{filename:'index.html embedded JS'});
+          for(const p of ['manifest.webmanifest','fixes.css','v3.css']) if(!fs.existsSync(p))throw Error('Missing '+p);
+          JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+          console.log('App syntax and required assets validated');
+          NODE
