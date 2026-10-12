@@ -101,6 +101,30 @@ sessionEditor=function(date){
  if(header)header.before(warmup);
  const actions=panel.querySelector('.actions');
  if(actions)actions.before(cooldown);else panel.append(cooldown);
+
+ // Exercise screen: only essential information visible.
+ panel.querySelectorAll('.exercise').forEach((node,i)=>{
+   const e=session.exercises[i];
+   node.querySelectorAll('.comparison,.movement-info,p.muted').forEach(x=>x.remove());
+   const tip=e?.tip||'';
+   const media=node.querySelector('.tlg-media');
+   const tools=node.querySelector('.button-row');
+   const details=document.createElement('details');
+   details.className='tlg-details';
+   const summary=document.createElement('summary');
+   summary.textContent='Details';
+   details.append(summary);
+   if(tip){const p=document.createElement('p');p.className='muted';p.textContent=tip;details.append(p)}
+   if(media){const photo=media.nextElementSibling;details.append(media);if(photo?.classList.contains('tlg-photo-wrap'))details.append(photo)}
+   if(tools)details.append(tools);
+   node.append(details);
+ });
+ panel.querySelectorAll('p').forEach(p=>{
+   const str=p.textContent.trim();
+   if(str.startsWith('Record each set')||str.startsWith('Week ')&&str.includes('reps in reserve'))p.remove();
+ });
+ const banner=panel.querySelector('.schedule');
+ if(banner){const count=banner.querySelector('.row');if(count)banner.replaceChildren(count);}
  const timer=document.createElement('div');timer.className='tlg-timer';timer.id='tlg-rest-timer';
  timer.innerHTML='<div class="tlg-timer-main"><div><div class="tag">REST TIMER</div><div class="tlg-timer-digit" id="tlg-clock">1:00</div></div><button class="primary" id="tlg-pause">Start</button></div><div class="tlg-timer-actions"><button data-time="60" class="selected">60 sec</button><button data-time="90">90 sec</button><button data-time="120">2 min</button><button id="tlg-reset">Reset</button></div>';
  root.insertBefore(timer,panel);
