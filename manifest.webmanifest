@@ -1,6 +1,6 @@
 {
-  "name": "Range Board",
-  "short_name": "Range Board",
+  "name": "Training Log",
+  "short_name": "Training",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0c1421",
