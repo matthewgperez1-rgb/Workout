@@ -105,3 +105,20 @@ test('working sets are primary and coaching details remain collapsed',async()=>{
  assert.deepEqual(errs,[]);
  await page.close();
 });
+
+test('Plan shows independent lift and running lanes on a single week',async()=>{
+ const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ await page.clock.install({time:new Date('2026-10-12T15:00:00-04:00')});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(base+'/',{waitUntil:'networkidle'});
+ await page.locator('nav button[data-tab="plan"]').click();
+ assert.equal(await page.locator('.v6-lane').count(),2);
+ assert.match(await page.locator('.v6-lane').nth(0).innerText(),/Upper A/);
+ assert.match(await page.locator('.v6-lane').nth(1).innerText(),/Easy.*Strides/);
+ await page.locator('.v6-lane').nth(1).locator('details.v6-session').first().locator('summary').click();
+ assert.match(await page.locator('.v6-lane').nth(1).innerText(),/Garmin results/);
+ const dims=await page.evaluate(()=>({body:document.body.scrollWidth,width:document.documentElement.clientWidth}));
+ assert.ok(dims.body<=dims.width+2,JSON.stringify(dims));
+ assert.deepEqual(errors,[]);
+ await page.close();
+});
