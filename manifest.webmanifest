@@ -1,0 +1,10 @@
+{
+  "name": "Range Board",
+  "short_name": "Range Board",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0c1421",
+  "theme_color": "#101a28",
+  "description": "Personal strength and running planner",
+  "icons": []
+}
