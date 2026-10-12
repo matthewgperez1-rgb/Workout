@@ -109,4 +109,35 @@ sessionEditor=function(date){oldSessionEditor(date);document.querySelectorAll('.
 const oldHistory=history;
 history=function(){let r=oldHistory();const m=db.mobility.filter(x=>x.completed).sort((a,b)=>b.date.localeCompare(a.date));if(m.length)r+='<div class="card"><h2>Mobility completed</h2>'+m.map(x=>'<div class="mini-row"><span>'+dateShort(x.date)+'</span><span>'+escapeHTML(mobilityPrograms.find(m=>m.id===x.program)?.title||x.program)+'</span></div>').join('')+'</div>';return r};
 
+
+/* Verified progressive-program module. Falls back to existing logs if module is unavailable. */
+import('./training-core.mjs').then(core=>{window.trainingCore=core;render()}).catch(err=>console.warn('Progression module unavailable',err));
+const previousPlan=planView;
+planView=function(){
+ const core=window.trainingCore,w=core?.trainingWeek(currentDate)||1,phase=core?.phaseForWeek(w);
+ const intro='<div class="card"><div class="row"><h2>Strength block · Week '+w+' of 12</h2><span class="pill-small">'+(phase?.label||'Foundation')+'</span></div><p>'+(phase?.effort||'Build movement quality')+'. This is a starting prescription, not an automatic load increase.</p><p class="muted">Weeks 4, 8, and 12 reduce volume. Running remains on the Tredict schedule and takes priority if fatigue is excessive.</p></div>';
+ return intro+previousPlan();
+};
+const previousEditor=sessionEditor;
+sessionEditor=function(date){
+ previousEditor(date);
+ const core=window.trainingCore;
+ if(!core)return;
+ const week=core.trainingWeek(date),phase=core.phaseForWeek(week);
+ const head=document.querySelector('#main .card h2');
+ if(head)head.insertAdjacentHTML('afterend','<p class="muted">Week '+week+' · '+phase.label+' · '+phase.effort+'</p>');
+ document.querySelectorAll('.exercise').forEach((node,i)=>{
+   const e=window.editSession?.exercises[i];if(!e)return;
+   const recommendation=core.prescribe(e,db.lifts,date);
+   const p=document.createElement('div');p.className='movement-info';p.textContent=recommendation.message;
+   node.querySelector('.comparison')?.after(p);
+ });
+};
+const previousProgress=progress;
+progress=function(){
+ const core=window.trainingCore;if(!core)return previousProgress();
+ const strength=core.liftSummary(db.lifts),running=core.runSummary(db.runs);
+ const stat='<div class="card"><h2>Recorded training totals</h2><div class="grid"><div class="metric"><strong>'+strength.sets+'</strong><span>Completed sets</span></div><div class="metric"><strong>'+running.miles.toFixed(1)+'</strong><span>Run miles</span></div><div class="metric"><strong>'+(running.averagePaceSeconds?pace(1,running.averagePaceSeconds):'—')+'</strong><span>Overall pace /mi</span></div></div><p class="muted">Pace is total recorded time divided by total distance, not a prediction of race fitness.</p></div>';
+ return stat+previousProgress();
+};
 </script></body></html>
