@@ -46,6 +46,7 @@ sessionEditor=function(date){
    const details=section.querySelector('.tlg-details');
    if(details)details.querySelectorAll('.tlg-media,.tlg-photo-wrap').forEach(el=>el.remove());
  });
+ panel.querySelectorAll('.tlg-stage .tlg-media,.tlg-stage .tlg-photo-wrap').forEach(x=>x.remove());
  const note=panel.querySelector('#lift-save-status');if(note)note.textContent='Saved locally';
 };
 const beforeMobility=openMobility;
