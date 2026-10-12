@@ -91,3 +91,17 @@ test('training session includes separate warm-up/cooldown and optional media con
  assert.ok(widths.body<=widths.viewport+2,'No horizontal overflow: '+JSON.stringify(widths));
  await page.close();
 });
+
+test('working sets are primary and coaching details remain collapsed',async()=>{
+ const page=await browser.newPage({viewport:{width:375,height:812},isMobile:true,hasTouch:true});
+ await page.clock.install({time:new Date('2026-10-12T15:00:00-04:00')});
+ const errs=[];page.on('pageerror',e=>errs.push(e.message));
+ await page.goto(base+'/',{waitUntil:'networkidle'});
+ await page.getByRole('button',{name:'Start workout'}).click();
+ const detail=page.locator('.exercise .tlg-details').first();
+ assert.equal(await detail.count(),1);
+ assert.equal(await detail.evaluate(el=>el.open),false);
+ assert.equal(await page.locator('.exercise input[data-k="weight"]').count()>0,true);
+ assert.deepEqual(errs,[]);
+ await page.close();
+});
