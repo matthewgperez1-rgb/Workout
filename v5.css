@@ -1,0 +1,57 @@
+/* Training Log v5 — warm graphite, ivory, coral. No blue dashboard panels. */
+:root{--bg:#161513;--panel:#22201d;--panel2:#2b2925;--edge:#48443c;--ink:#f6f1e8;--muted:#b4a99b;--focus:#e29b77;--active:#edd0a4;background:#161513;color:#f6f1e8}
+body{background:#161513;color:#f6f1e8}
+header{background:#1c1a17;border-color:#3e3a34}
+header .eyebrow{color:#e29b77}
+header #clock{background:#373028;color:#f4ddc3}
+.card,.day-card,.tlg-stage{background:#25221e;border-color:#474039;box-shadow:none}
+button{background:#39342d;border-color:#554b40;color:#f7f0e6}
+button.primary,.tlg-timer button.selected{background:#e29b77;border-color:#e29b77;color:#261c16}
+a,.tlg-media,.tlg-details summary{color:#edbb97}
+nav{background:#201d19;border-color:#49423a}
+nav button{color:#c9bdb0}
+nav button.active{color:#f1b897;border-color:#e29b77;background:#372b26}
+.pill,.pill-small,.metric,.t5-stat{background:#342f29;color:#eee2d3}
+.tlg-timer{background:#211d19;border-color:#756452}
+.tlg-timer-digit{color:#fff5e6}
+.exercise,.tlg-stage-item,.t5-line{border-color:#484139}
+.comparison,.schedule{background:#322b25;border-color:#e29b77}
+.sets input,textarea,select{background:#1a1815;border-color:#605548;color:#f7f0e8}
+.sets input[type=checkbox],.tlg-stage input{accent-color:#e29b77}
+.t5-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 2px 14px}
+.t5-head h2{margin:0;font-size:19px}
+.t5-head span{font-size:12px;color:#b7aa9a}
+.t5-week{background:#24211d;border:1px solid #4b443d;border-radius:14px;padding:8px 12px;margin:0 0 13px}
+.t5-weektitle{font-size:12px;color:#dcaf8e;font-weight:700;padding:8px 3px 11px}
+details.t5-week>summary{padding:12px 4px;font-weight:700;display:flex;justify-content:space-between;cursor:pointer;list-style:none}
+.t5-day{border-top:1px solid #443d36}
+.t5-day>summary{display:flex;gap:12px;align-items:center;padding:13px 0;list-style:none;cursor:pointer}
+.t5-daylabel{width:49px;flex-shrink:0;display:flex;flex-direction:column;gap:2px}
+.t5-daylabel strong{font-size:13px}
+.t5-daylabel small{color:#a99e8f;font-size:11px}
+.t5-dayname{flex:1;min-width:0;font-size:14px;font-weight:650}
+.t5-runname{font-size:12px;color:#c7b7a4;font-weight:450;margin-top:4px}
+.t5-chevron{font-size:18px;color:#d8a481}
+.t5-daybody{padding:0 0 12px 61px}
+.t5-preview{background:#312b25;border-radius:10px;margin:6px 0;padding:10px}
+.t5-preview>summary{display:flex;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;align-items:center}
+.t5-preview>summary strong{font-size:12px;font-weight:650}
+.t5-preview>summary span{color:#bdb1a4;font-size:11px;white-space:nowrap}
+.t5-inside{padding-top:10px}
+.t5-inside button{margin-top:10px}
+.t5-inside p{font-size:12px;margin:4px 0}
+.t5-line{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #464037;padding:9px 0;font-size:12px}
+.t5-line>span:last-child,.t5-line>strong{white-space:nowrap;color:#ecd2b8}
+.t5-mobility{display:grid;gap:10px}
+.t5-mobcard{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#26221e;border:1px solid #4c453d;border-radius:13px;padding:15px}
+.t5-mobcard strong{display:block;font-size:15px}
+.t5-mobcard small{color:#bbafa2;font-size:12px;margin-top:4px;display:block}
+.t5-mobcard button{flex-shrink:0}
+.t5-statgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:5px 0 16px}
+.t5-stat{border:1px solid #51473c;border-radius:11px;padding:12px 6px;text-align:center;min-width:0}
+.t5-stat strong{display:block;font-size:23px}
+.t5-stat span{display:block;font-size:11px;color:#bcb0a1}
+.t5-empty{font-size:13px;color:#b6aa9d;padding:15px}
+.tlg-timer-actions button{background:#38312a;color:#eee4d9}
+.tlg-timer-actions button.selected{background:#e29b77;color:#241b17}
+@media(max-width:390px){.t5-daybody{padding-left:0}.t5-day>summary{gap:7px}.t5-daylabel{width:45px}.t5-head span{font-size:11px}.t5-stat strong{font-size:20px}}
