@@ -33,7 +33,7 @@ async function getExerciseInfo(name){
   return match||null;
 }
 window.trainingPhoto = async (btn,name)=>{
- const holder=btn.parentElement.querySelector('.tlg-photo-wrap')||btn.nextElementSibling;
+ const holder=btn.parentElement.querySelector('.tlg-photo-wrap')||btn.nextElementSibling||btn.closest('.tlg-stage-item')?.nextElementSibling;
  if(!holder)return;
  if(holder.dataset.open==='yes'){holder.replaceChildren();holder.dataset.open='no';return}
  holder.textContent='Loading reference…';
