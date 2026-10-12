@@ -6,5 +6,12 @@
   "background_color": "#0c1421",
   "theme_color": "#101a28",
   "description": "Personal strength and running planner",
-  "icons": []
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
