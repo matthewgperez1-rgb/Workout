@@ -3,8 +3,8 @@
   "short_name": "Training",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#0c1421",
-  "theme_color": "#101a28",
+  "background_color": "#f8f7f3",
+  "theme_color": "#f8f7f3",
   "description": "Personal strength and running planner",
   "icons": [
     {
