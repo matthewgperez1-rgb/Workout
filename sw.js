@@ -1,11 +1,6 @@
-const CACHE='training-log-rebuild-v5';
-const ASSETS=['./','./index.html','./app.css','./app.mjs','./program.mjs','./exercise-library.mjs','./manifest.webmanifest','./icon.svg'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('training-log-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{
- if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;
- e.respondWith(fetch(e.request).then(response=>{
-  if(response.ok)caches.open(CACHE).then(cache=>cache.put(e.request,response.clone())).catch(()=>{});
-  return response;
- }).catch(()=>caches.match(e.request).then(r=>r||caches.match('./index.html'))));
-});
+const CACHE='training-log-v3.0.0';
+const CORE=['./','./index.html','./app.css','./app.mjs','./program.mjs','./exercise-library.mjs','./icon.svg','./manifest.webmanifest','./modules/dates.mjs','./modules/store.mjs','./modules/schedule.mjs','./modules/exercises.mjs','./modules/analytics.mjs','./modules/timer.mjs','./modules/backup.mjs','./modules/ui.mjs','./modules/views.mjs','./assets/fonts/SpaceGrotesk.ttf','./assets/fonts/Manrope.ttf','./assets/icon-180.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-maskable.png'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)));});
+self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE_UPDATE')self.skipWaiting();});
+self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==CACHE&&(k.startsWith('training-log-')||k.startsWith('range-board-')))await caches.delete(k);await self.clients.claim();})());});
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==self.location.origin)return;e.respondWith((async()=>{const cache=await caches.open(CACHE);const cached=await cache.match(e.request);if(cached)return cached;try{const r=await fetch(e.request);if(r.ok&&CORE.some(x=>new URL(x,self.registration.scope).pathname===u.pathname))await cache.put(e.request,r.clone());return r;}catch{if(e.request.mode==='navigate')return await cache.match('./index.html');return new Response('Offline asset unavailable',{status:503});}})());});

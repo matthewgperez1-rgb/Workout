@@ -1,17 +1,1 @@
-{
-  "name": "Training Log",
-  "short_name": "Training",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#f8f7f3",
-  "theme_color": "#f8f7f3",
-  "description": "Personal strength and running planner",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
-}
+{"id":"./","name":"Training Log","short_name":"Training Log","description":"Personal strength, running and mobility log","start_url":"./","scope":"./","display":"standalone","background_color":"#0b0d10","theme_color":"#0b0d10","icons":[{"src":"./assets/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"./assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},{"src":"./assets/icon-maskable.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]}

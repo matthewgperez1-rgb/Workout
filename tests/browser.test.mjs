@@ -1,127 +1,28 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import {createServer} from 'node:http';
-import {readFile,stat} from 'node:fs/promises';
-import path from 'node:path';
-import {chromium} from 'playwright';
-let server,browser,base;
-test.before(async()=>{
- server=createServer(async(req,res)=>{
-  try{let filename=path.resolve(process.cwd(),'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
-   if(!filename.startsWith(process.cwd()+path.sep)&&filename!==process.cwd()){res.writeHead(403).end();return}
-   if((await stat(filename)).isDirectory())filename=path.join(filename,'index.html');
-   let type=filename.endsWith('.mjs')?'text/javascript':filename.endsWith('.css')?'text/css':filename.endsWith('.html')?'text/html':filename.endsWith('.json')?'application/json':'text/plain';
-   res.writeHead(200,{'Content-Type':type});res.end(await readFile(filename));
-  }catch{res.writeHead(404).end('Missing')}
- });await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
- base='http://127.0.0.1:'+server.address().port;browser=await chromium.launch({headless:true});
-});
-test.after(async()=>{await browser?.close();await new Promise(ok=>server?.close(ok))});
-async function newPage(){
- const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
- await page.clock.install({time:new Date('2026-10-12T15:00:00-04:00')});
- const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(base+'/',{waitUntil:'networkidle'});return {page,errors};
-}
-test('home shows independently planned lift and Garmin run',async()=>{
- const {page,errors}=await newPage();
- assert.match(await page.locator('main').innerText(),/Upper A/);
- assert.match(await page.locator('main').innerText(),/Easy.*Strides/);
- assert.ok(await page.locator('.stage').count()===1);
- assert.deepEqual(errors,[]);
- const width=await page.evaluate(()=>({scroll:document.body.scrollWidth,viewport:document.documentElement.clientWidth}));
- assert.ok(width.scroll<=width.viewport+2,JSON.stringify(width));
- await page.close();
-});
-test('calendar shows two sessions on Monday and allows moving run to Tuesday',async()=>{
- const {page,errors}=await newPage();
- await page.getByRole('button',{name:'Plan'}).click();
- assert.equal(await page.locator('.session').count()>=2,true);
- await page.locator('.session.run').first().click();
- await page.getByRole('button',{name:'Move workout'}).click();
- await page.locator('[data-target="2026-10-13"]').click();
- const moves=await page.evaluate(()=>JSON.parse(localStorage.getItem('rangeboard_v2')).moves.run);
- assert.equal(moves['2026-10-12'],'2026-10-13');
- assert.match(await page.locator('main').innerText(),/Easy.*Strides/);
- assert.deepEqual(errors,[]);
- await page.close();
-});
-test('live strength log saves set and preserves it after leaving',async()=>{
- const {page,errors}=await newPage();
- await page.getByRole('button',{name:/Open workout/}).click();
- await page.locator('[data-field="weight"]').first().fill('30');
- await page.locator('[data-field="weight"]').first().dispatchEvent('change');
- await page.locator('[data-field="done"]').first().check();
- await page.locator('[data-page="today"]').click();
- await page.getByRole('button',{name:/Open workout/}).click();
- assert.equal(await page.locator('[data-field="weight"]').first().inputValue(),'30');
- assert.equal(await page.locator('[data-field="done"]').first().isChecked(),true);
- assert.deepEqual(errors,[]);
- await page.close();
-});
-test('rest timer offers 60 second option and mobility is independent',async()=>{
- const {page,errors}=await newPage();
- await page.getByRole('button',{name:/Open workout/}).click();
- await page.locator('[data-timer="60"]').click();
- assert.equal(await page.locator('#timer-value').innerText(),'1:00');
- await page.getByRole('button',{name:'Mobility'}).click();
- assert.equal(await page.locator('.mobility-card').count(),9);
- assert.deepEqual(errors,[]);
- await page.close();
-});
-test('font and backgrounds remain readable without layered themes',async()=>{
- const {page}=await newPage();
- const styles=await page.evaluate(()=>({bg:getComputedStyle(document.body).backgroundColor,color:getComputedStyle(document.body).color,stylesheets:document.styleSheets.length}));
- assert.equal(styles.bg,'rgb(32, 37, 42)');
- assert.equal(styles.color,'rgb(245, 245, 242)');
- assert.equal(styles.stylesheets,1);
- await page.close();
-});
+import test from 'node:test';import assert from 'node:assert/strict';
+import {chromium,webkit} from 'playwright';
+import {serve} from '../scripts/serve.mjs';
+import {mkdir} from 'node:fs/promises';
+import {fresh} from '../modules/store.mjs';
+let server,browser,base;const engine=process.env.BROWSER||'chromium';
+test.before(async()=>{const s=await serve();server=s.server;base=s.url;browser=await (engine==='webkit'?webkit:chromium).launch({headless:true});await mkdir('qa-output',{recursive:true});});
+test.after(async()=>{await browser?.close();await new Promise(ok=>server?.close(ok));});
+async function newPage(width=390,seed=null){const context=await browser.newContext({viewport:{width,height:844},isMobile:true,hasTouch:true,timezoneId:'America/New_York',deviceScaleFactor:1});const page=await context.newPage();await page.clock.install({time:new Date('2026-10-12T15:00:00-04:00')});if(seed)await page.addInitScript(value=>{if(!localStorage.getItem('rangeboard_v2'))localStorage.setItem('rangeboard_v2',JSON.stringify(value));},seed);const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(base+'/',{waitUntil:'networkidle'});return {page,context,errors};}
+const nav=(p,name)=>p.getByRole('button',{name,exact:true}).click();
+const start=p=>p.getByRole('button',{name:'Start workout',exact:true}).click();
+async function storage(p){return p.evaluate(()=>JSON.parse(localStorage.getItem('rangeboard_v2')));}
+async function noErrors(errors){assert.deepEqual(errors,[]);}
 
-test('history expands saved strength session into completed weights and reps',async()=>{
- const {page,errors}=await newPage();
- await page.getByRole('button',{name:/Open workout/}).click();
- await page.locator('[data-field="weight"]').first().fill('45');
- await page.locator('[data-field="weight"]').first().dispatchEvent('change');
- await page.locator('[data-field="done"]').first().check();
- await page.locator('[data-page="history"]').click();
- await page.locator('.history-entry').first().locator('summary').click();
- assert.match(await page.locator('.history-detail').first().innerText(),/45 lb/);
- assert.deepEqual(errors,[]);
- await page.close();
-});
-
-test('exercise library filters by muscle and equipment, and opens movement details',async()=>{
- const {page,errors}=await newPage();
- await page.getByRole('button',{name:'Library'}).click();
- assert.match(await page.locator('main').innerText(),/Exercise library/);
- await page.locator('#lib-group').selectOption('Chest');
- await page.locator('#lib-equip').selectOption('Dumbbell');
- assert.ok(await page.locator('.lib-item').count()>=3);
- await page.locator('#lib-search').fill('Incline');
- assert.match(await page.locator('.lib-results').innerText(),/Incline dumbbell press/);
- await page.locator('.lib-item').first().click();
- assert.match(await page.locator('main').innerText(),/Movement reference/);
- assert.deepEqual(errors,[]);
- await page.close();
-});
-test('workout can replace an exercise or add one, and logs persist on device',async()=>{
- const {page,errors}=await newPage();
- await page.getByRole('button',{name:/Open workout/}).click();
- await page.locator('.exercise-box').first().locator('summary').click();
- await page.locator('[data-replace="0"]').click();
- await page.locator('#lib-search').fill('Machine chest press');
- await page.locator('.lib-item').first().click();
- await page.locator('#lib-apply').click();
- assert.match(await page.locator('.exercise-box').first().innerText(),/Machine chest press/);
- await page.locator('#add-from-library').click();
- await page.locator('#lib-search').fill('Pallof press');
- await page.locator('.lib-item').first().click();
- await page.locator('#lib-apply').click();
- assert.match(await page.locator('.exercise-box').last().innerText(),/Pallof press/);
- const logged=await page.evaluate(()=>JSON.parse(localStorage.getItem('rangeboard_v2')).lifts[0]);
- assert.equal(logged.exercises[0].name,'Machine chest press');
- assert.equal(logged.exercises.at(-1).name,'Pallof press');
- assert.deepEqual(errors,[]);
- await page.close();
-});
+test('today shows independently planned lift and run; empty numbers are truthful',async()=>{const {page,context,errors}=await newPage();assert.match(await page.locator('main').innerText(),/Upper A/);assert.match(await page.locator('main').innerText(),/Easy.*Strides/);assert.equal(await page.locator('.metric strong').first().innerText(),'0');assert.equal(await page.getByRole('button',{name:'Start workout',exact:true}).count(),1);await noErrors(errors);await context.close();});
+test('set autosave survives navigation, reload and resumed workout',async()=>{const {page,context,errors}=await newPage();await start(page);await page.locator('[data-field="weight"]').first().fill('10');await page.locator('[data-field="done"]').first().check();await nav(page,'Today');await page.getByRole('button',{name:'Continue workout',exact:true}).click();assert.equal(await page.locator('[data-field="weight"]').first().inputValue(),'10');assert.ok(await page.locator('[data-field="done"]').first().isChecked());await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'Continue workout',exact:true}).click();assert.ok(await page.locator('[data-field="done"]').first().isChecked());assert.match(await page.locator('#timer-value').innerText(),/0:5|1:00/);await noErrors(errors);await context.close();});
+test('zero-duration or zero-rep set cannot be completed',async()=>{const {page,context}=await newPage();await start(page);await page.locator('[data-field="reps"]').first().fill('0');await page.locator('[data-field="done"]').first().check();assert.equal(await page.locator('[data-field="done"]').first().isChecked(),false);assert.equal((await storage(page)).lifts[0].exercises[0].sets[0].done,false);await context.close();});
+test('substitution preserves completed power sets and matches movement patterns',async()=>{const {page,context,errors}=await newPage();await start(page);await page.locator('[data-field="weight"]').first().fill('10');await page.locator('[data-field="done"]').first().check();await page.locator('[data-action="replace"]').first().click();assert.match(await page.locator('main').innerText(),/matching movement patterns/);await page.locator('#lib-search').fill('Medicine ball slam');await page.locator('.library-item').first().click();await page.getByRole('button',{name:'Use this substitute',exact:true}).click();const d=await storage(page);assert.equal(d.lifts[0].exercises[0].name,'Medicine ball chest pass');assert.equal(d.lifts[0].exercises[0].sets[0].done,true);assert.equal(d.lifts[0].exercises[1].name,'Medicine ball slam');assert.equal(d.lifts[0].exercises[1].sets.length,2);assert.equal(d.lifts[0].exercises[1].sets.some(s=>s.done),false);await noErrors(errors);await context.close();});
+test('run move preserves lift and original Tredict ID, multiple sessions remain visible',async()=>{const {page,context,errors}=await newPage();await nav(page,'Plan');await page.locator('.session-card.run').first().click();await page.getByRole('button',{name:'Move',exact:true}).click();await page.locator('#move-date').fill('2026-10-16');await page.locator('#move-date').dispatchEvent('change');assert.ok(await page.locator('#move-warnings .warning').count()>0);await page.getByRole('button',{name:'Move session',exact:true}).click();const d=await storage(page);assert.equal(d.moves.run['2026-10-12'],'2026-10-16');assert.equal(await page.locator('[data-date="2026-10-16"].session-card.run').count(),2);assert.equal(await page.locator('[data-date="2026-10-12"].session-card:not(.run)').count(),1);await noErrors(errors);await context.close();});
+test('manual Garmin run draft survives leaving, pace calculates and history corrects safely',async()=>{const {page,context,errors}=await newPage();await page.locator('.session-card.run').click();await page.getByRole('button',{name:'Enter Garmin results',exact:true}).click();await page.locator('#r-distance').fill('3');await page.locator('#r-minutes').fill('30');await page.locator('#r-seconds').fill('0');assert.equal(await page.locator('#run-pace').innerText(),'10:00');await nav(page,'Today');await page.locator('.session-card.run').click();await page.getByRole('button',{name:'Enter Garmin results',exact:true}).click();assert.equal(await page.locator('#r-distance').inputValue(),'3');await page.getByRole('button',{name:'Save run',exact:true}).click();await page.locator('.history-entry summary').click();assert.match(await page.locator('.history-detail').innerText(),/10:00/);await page.getByRole('button',{name:'Correct entry',exact:true}).click();await page.locator('#r-minutes').fill('31');await page.getByRole('button',{name:'Save corrections',exact:true}).click();const d=await storage(page);assert.equal(d.runs.length,1);assert.equal(d.runs[0].minutes,31);assert.ok(d.audit.length);assert.ok(await page.evaluate(()=>localStorage.getItem('training-log-recovery')));await noErrors(errors);await context.close();});
+test('optional mobility autosaves separately; all nine routines have offline guidance',async()=>{const {page,context,errors}=await newPage();await page.getByRole('button',{name:'Mobility',exact:true}).click();assert.equal(await page.locator('.mobility-card').count(),9);await page.locator('.mobility-card').first().click();await page.locator('[data-mstep]').first().check();await page.getByRole('button',{name:'Technique',exact:true}).first().click();assert.equal(await page.locator('.guide-steps li').count(),3);await page.getByRole('button',{name:'Got it',exact:true}).click();await page.getByRole('button',{name:'Save routine',exact:true}).click();const d=await storage(page);assert.equal(d.mobility.length,1);assert.equal(d.lifts.length,0);assert.equal(d.mobility[0].completed,false);await noErrors(errors);await context.close();});
+test('library filters by equipment and muscle; custom exercise IDs stay stable',async()=>{const {page,context,errors}=await newPage();await nav(page,'Library');await page.locator('#lib-group').selectOption('Chest');await page.locator('#lib-equip').selectOption('Dumbbell');assert.ok(await page.locator('.library-item').count()>=3);await page.locator('#lib-search').fill('Incline');assert.match(await page.locator('.lib-results').innerText(),/Incline dumbbell press/);await page.getByRole('button',{name:'Create custom exercise',exact:true}).click();await page.locator('#custom-name').fill('My cable press');await page.locator('#custom-guide').fill('Brace and press smoothly.');await page.getByRole('button',{name:'Save exercise',exact:true}).click();const d=await storage(page);assert.match(d.customExercises[0].id,/custom-/);await noErrors(errors);await context.close();});
+test('history shows original completed sets and exercise progression uses real data',async()=>{const d=fresh();d.lifts=[{id:'test-log-1',date:'2026-10-05',session:'Upper A — Push',finished:true,exercises:[{name:'DB bench press',sets:[{weight:35,reps:10,done:true}]}]},{id:'test-log-2',date:'2026-10-12',session:'Upper A — Push',finished:true,exercises:[{name:'DB bench press',sets:[{weight:40,reps:10,done:true}]}]}];const {page,context,errors}=await newPage(390,d);await nav(page,'History');await page.locator('.history-entry summary').first().click();assert.match(await page.locator('.history-detail').first().innerText(),/40 lb \/ hand × 10 reps/);await nav(page,'Progress');assert.equal(await page.locator('.line-chart').count(),1);assert.match(await page.locator('main').innerText(),/35/);assert.match(await page.locator('main').innerText(),/40/);await noErrors(errors);await context.close();});
+test('import merges safely, reports conflicts and export retains records',async()=>{const {page,context,errors}=await newPage();await start(page);await nav(page,'Settings');const before=await storage(page),incoming=structuredClone(before);incoming.lifts[0].notes='Different version';await page.locator('#jsonfile').setInputFiles({name:'test-import.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(incoming))});assert.match(await page.locator('#dialog').innerText(),/1 conflicts/);await page.getByRole('button',{name:'Merge records',exact:true}).click();assert.equal((await storage(page)).conflicts.length,1);const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export JSON',exact:true}).click();assert.match((await download).suggestedFilename(),/training-log/);await noErrors(errors);await context.close();});
+test('timer retains 60/90/120 options and advances through a 60-minute session',async()=>{const {page,context,errors}=await newPage();await start(page);await page.getByRole('button',{name:'90 second timer',exact:true}).click();await page.locator('#timer-toggle').click();await page.clock.fastForward(45000);assert.equal(await page.locator('#timer-value').innerText(),'0:45');await page.locator('#timer-toggle').click();await page.clock.fastForward(60000);assert.equal(await page.locator('#timer-value').innerText(),'0:45');await page.locator('#timer-toggle').click();await page.clock.fastForward(3600000);assert.equal(await page.locator('#timer-value').innerText(),'0:00');await page.getByRole('button',{name:'60 second timer',exact:true}).click();assert.equal(await page.locator('#timer-value').innerText(),'1:00');await noErrors(errors);await context.close();});
+test('offline restart loads the entire app and retains set data',async()=>{const {page,context,errors}=await newPage();await start(page);await page.locator('[data-field="weight"]').first().fill('10');await page.locator('[data-field="done"]').first().check();await page.evaluate(()=>navigator.serviceWorker.ready);await context.setOffline(true);await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'Continue workout',exact:true}).click();assert.equal(await page.locator('[data-field="weight"]').first().inputValue(),'10');assert.ok(await page.locator('[data-field="done"]').first().isChecked());assert.match(await page.locator('#save-state').innerText(),/offline/);await noErrors(errors);await context.close();});
+for(const width of [360,390,430])test(`all screens fit ${width}px with no horizontal overflow and usable nav`,async()=>{const {page,context,errors}=await newPage(width);for(const name of ['Today','Plan','History','Progress','Library']){await nav(page,name);const bounds=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,nav:document.querySelector('.bottom').getBoundingClientRect().height}));assert.ok(bounds.scroll<=bounds.width+1,`${name}: ${JSON.stringify(bounds)}`);assert.ok(bounds.nav>=70);await page.screenshot({path:`qa-output/${engine}-${width}-${name.toLowerCase()}.png`,fullPage:true});}await nav(page,'Today');await start(page);const inputs=await page.locator('.set-row input').first().boundingBox();assert.ok(inputs.height>=48);await page.screenshot({path:`qa-output/${engine}-${width}-active-lift.png`,fullPage:true});await nav(page,'Today');await page.getByRole('button',{name:'Mobility',exact:true}).click();await page.screenshot({path:`qa-output/${engine}-${width}-mobility.png`,fullPage:true});await nav(page,'Settings');await page.screenshot({path:`qa-output/${engine}-${width}-settings.png`,fullPage:true});await noErrors(errors);await context.close();});
+test('GitHub token stays out of storage and source, manual backup handles conflict safely',async()=>{const {page,context,errors}=await newPage();await nav(page,'Settings');await page.locator('#token').fill('TEST_ONLY_TOKEN');await page.getByRole('button',{name:'Connect',exact:true}).click();assert.equal(await page.evaluate(()=>JSON.stringify(localStorage).includes('TEST_ONLY_TOKEN')),false);const remote=fresh();remote.runs=[{id:'remote-test',date:'2026-10-11',distance:2,minutes:20,seconds:0}];const content=Buffer.from(JSON.stringify(remote)).toString('base64');let put=false;await page.route('https://api.github.com/repos/**/contents/training-data.json',async route=>{if(route.request().method()==='GET')await route.fulfill({json:{sha:'old-sha',content}});else {put=true;const p=route.request().postDataJSON();assert.equal(p.sha,'old-sha');await route.fulfill({json:{content:{sha:'new-sha'}}});}});await page.getByRole('button',{name:'Back up now',exact:true}).click();assert.ok(put);assert.equal((await storage(page)).runs.length,1);assert.match(await page.locator('#sync-status').innerText(),/Backed up/);await noErrors(errors);await context.close();});
