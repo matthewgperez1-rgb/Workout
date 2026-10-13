@@ -87,8 +87,26 @@ window.t7ConfirmMove=(type,source,date)=>{
  if(movedSource(type,date)&&movedSource(type,date)!==source)return;
  if(type==='run'&&db.runs.some(r=>r.date===source)){alert('Recorded runs cannot be rescheduled.');return}
  if(type==='lift'&&db.lifts.some(r=>r.date===source)){alert('Started lifts cannot be rescheduled.');return}
- if(date===source)delete db.moves[type][source];else db.moves[type][source]=date;
+ const old=db.moves[type][source];
+ if(type==='lift'&&old&&old!==source)delete db.overrides[old];
+ if(date===source){delete db.moves[type][source];}
+ else {db.moves[type][source]=date;if(type==='lift')db.overrides[date]=plan(source);}
  persist();view('plan');
 };
 
+const oldToday=today;
+today=function(){
+ const p=oldToday();
+ const sourceLift=movedSource('lift',currentDate);
+ const sourceRun=movedSource('run',currentDate);
+ // When rescheduled, show the calendar as the authoritative source of planned sessions.
+ const card=(kind,source)=>{
+  if(!source)return '<section class="v6-now-card"><div class="tag">'+kind+'</div><h2>No scheduled '+(kind==='RUN'?'run':'lift')+'</h2></section>';
+  const data=kind==='RUN'?runSpecs[source]:plan(source);
+  const name=kind==='RUN'?data[0]:data.name;
+  const detail=kind==='RUN'?data[1]+' min planned':data.moves.length+' exercises';
+  return '<section class="v6-now-card"><div class="tag">'+kind+'</div><h2>'+escapeHTML(name)+'</h2><p>'+detail+'</p><button class="primary" onclick="window.t7Open(\\''+(kind==='RUN'?'run':'lift')+'\\',\\''+currentDate+'\\')">Open session</button></section>';
+ };
+ return '<div class="v6-home"><h2 class="v6-page-title">Today</h2><div class="v6-lanes">'+card('LIFT',sourceLift)+card('RUN',sourceRun)+'</div><div class="v6-home-next"><button onclick="view(\\'plan\\')">View calendar →</button></div></div>';
+};
 })();
