@@ -189,8 +189,30 @@ function editRun(date,p){
  document.getElementById('submit-run').onclick=()=>{const distance=Number(document.getElementById('r-distance').value),minutes=Number(document.getElementById('r-minutes').value),seconds=Number(document.getElementById('r-seconds').value),effort=Number(document.getElementById('r-effort').value),newDate=document.getElementById('r-date').value;if(!(distance>0&&Number.isInteger(minutes)&&minutes>=0&&Number.isInteger(seconds)&&seconds>=0&&seconds<60&&(minutes*60+seconds)>0&&effort>=1&&effort<=10&&newDate))return alert('Check distance, elapsed time, and effort.');if(data.runs.some(x=>x.date===newDate&&x.id!==old?.id))return alert('A run is already recorded for that date.');const item={id:old?.id||uid(),date:newDate,distance,minutes,seconds,effort,avgHR:Number(document.getElementById('r-hr').value)||null,cadence:Number(document.getElementById('r-cad').value)||null,notes:document.getElementById('r-notes').value,source:'garmin-manual',updated:new Date().toISOString()};const at=data.runs.findIndex(x=>x.id===item.id);if(at>=0)data.runs[at]=item;else data.runs.push(item);save();selected=newDate;go('today')}
 }
 function historyPage(){
- const entries=[...data.lifts.map(x=>({date:x.date,title:x.session,type:x.finished?'Strength':'Draft',detail:x.exercises.reduce((a,e)=>a+e.sets.filter(s=>s.done).length,0)+' completed sets'})),...data.runs.map(x=>({date:x.date,title:'Run',type:'Running',detail:x.distance+' mi · '+runPace(x.distance,x.minutes*60+x.seconds)+'/mi'})),...data.mobility.filter(x=>x.completed).map(x=>({date:x.date,title:x.program,type:'Mobility',detail:'Completed'}))].sort((a,b)=>b.date.localeCompare(a.date));
- chrome('<div class="view-head"><div class="eyebrow">ACTIVITY</div><h1 class="title">Training history.</h1></div><div class="info-panel">'+(entries.length?entries.map(x=>'<div class="history-row"><div><b>'+esc(x.title)+'</b><small>'+pretty(x.date)+' · '+x.type+'</small></div><span>'+esc(x.detail)+'</span></div>').join(''):'<p>No sessions recorded yet.</p>')+'</div>')
+ const entries=[
+  ...data.lifts.map(x=>({date:x.date,title:x.session,type:x.finished?'Strength':'Draft',kind:'lift',item:x})),
+  ...data.runs.map(x=>({date:x.date,title:'Run',type:'Running',kind:'run',item:x})),
+  ...data.mobility.filter(x=>x.completed).map(x=>({date:x.date,title:x.program,type:'Mobility',kind:'mobility',item:x}))
+ ].sort((a,b)=>b.date.localeCompare(a.date));
+ const rows=entries.map(x=>{
+  const item=x.item;
+  let contents='',summary='';
+  if(x.kind==='lift'){
+   const count=item.exercises.reduce((n,e)=>n+e.sets.filter(t=>t.done).length,0);
+   summary=count+' completed sets';
+   contents=item.exercises.map(e=>'<div class="history-exercise"><strong>'+esc(e.name)+'</strong>'+
+    (e.sets.some(t=>t.done)?e.sets.map((t,i)=>t.done?'<div class="history-set"><span>Set '+(i+1)+'</span><span>'+Number(t.weight||0)+' lb × '+Number(t.reps||0)+' reps</span></div>':'').join(''):'<p class="note">No sets completed</p>')+'</div>').join('');
+   if(item.notes)contents+='<p class="note">'+esc(item.notes)+'</p>';
+  }else if(x.kind==='run'){
+   summary=item.distance+' mi · '+runPace(item.distance,item.minutes*60+item.seconds)+'/mi';
+   contents='<div class="history-set"><span>Duration</span><span>'+item.minutes+'m '+item.seconds+'s</span></div>'+
+   '<div class="history-set"><span>Effort</span><span>'+esc(item.effort??'—')+'/10</span></div>'+
+   (item.avgHR?'<div class="history-set"><span>Avg HR</span><span>'+item.avgHR+' bpm</span></div>':'')+
+   (item.notes?'<p class="note">'+esc(item.notes)+'</p>':'');
+  }else{summary='Completed';contents='<p class="note">Mobility routine completed</p>'}
+  return '<details class="history-entry"><summary><span><strong>'+esc(x.title)+'</strong><small>'+pretty(x.date)+' · '+x.type+'</small><em>'+esc(summary)+'</em></span><span class="history-chevron">⌄</span></summary><div class="history-detail">'+contents+'</div></details>';
+ }).join('');
+ chrome('<div class="view-head"><div class="eyebrow">ACTIVITY</div><h1 class="title">Training history.</h1><p class="subtitle">Select a session to review what you recorded.</p></div><div class="info-panel">'+(rows||'<p>No sessions recorded yet.</p>')+'</div>');
 }
 function progressPage(){
  const completed=data.lifts.filter(x=>x.finished),runs=data.runs,miles=runs.reduce((a,x)=>a+Number(x.distance||0),0),sets=completed.reduce((a,x)=>a+x.exercises.flatMap(e=>e.sets.filter(s=>s.done)).length,0);
