@@ -1,3 +1,5 @@
+Current update: **3.1.0**. See [3.1 release notes](docs/RELEASE-3.1.md) for profile/bodyweight trends and gym logging improvements. Existing schema-2 records are retained.
+
 # Training Log
 
 A personal, phone-first strength, running and mobility PWA. Hosted at https://matthewgperez1-rgb.github.io/Workout/.
