@@ -238,3 +238,5 @@ html,body{background:#20252a;color:#f5f5f2}
 .lib-context strong{font-size:13px;color:#effff5}
 .photo-button{font-size:12px;min-height:36px}
 @media(max-width:380px){.lib-head{grid-template-columns:1fr}.lib-filters{grid-template-columns:1fr}}
+
+.mark{transform:none;background:#303b3d;overflow:hidden}.mark svg{height:32px;width:32px;display:block}
