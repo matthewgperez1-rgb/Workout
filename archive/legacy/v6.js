@@ -42,3 +42,4 @@ today=function(){
  return '<div class="v6-home"><h2 class="v6-page-title">Today</h2><div class="v6-lanes">'+strength+running+'</div><div class="v6-home-next"><span>Need the full week?</span><button onclick="view(\'plan\')">Open schedule →</button></div></div>';
 };
 })();
+

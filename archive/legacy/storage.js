@@ -133,3 +133,4 @@ function rbParseTimeToSeconds(str) {
   if (!m) return null;
   return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
 }
+

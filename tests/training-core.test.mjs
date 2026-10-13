@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {trainingWeek,phaseForWeek,prescribe,liftSummary,runSummary,dedupeByDateId,validateBackup} from '../training-core.mjs';
+import {trainingWeek,phaseForWeek,prescribe,liftSummary,runSummary,dedupeByDateId,validateBackup} from '../archive/legacy/training-core.mjs';
 test('week boundaries start October 12',()=>{assert.equal(trainingWeek('2026-10-12'),1);assert.equal(trainingWeek('2026-10-19'),2);assert.equal(trainingWeek('2026-12-28'),12)});
 test('every fourth week lowers programming volume',()=>{assert.equal(phaseForWeek(4).factor,.65);assert.equal(phaseForWeek(8).factor,.65);assert.equal(phaseForWeek(12).factor,.65);assert.equal(phaseForWeek(3).factor,1)});
 const entry=(date,sets,finished=true)=>({date,finished,exercises:[{name:'DB bench press',sets}]});
@@ -28,3 +28,4 @@ test('dedupe records newest update only',()=>{
 const r=dedupeByDateId([{id:'a',updated:'2026-10-12T00:00Z'},{id:'a',updated:'2026-10-13T00:00Z'}]);assert.equal(r.length,1);assert.equal(r[0].updated,'2026-10-13T00:00Z');
 });
 test('reject malformed backups',()=>{assert.equal(validateBackup({schema:2,lifts:[],runs:[],mobility:[]}),true);assert.equal(validateBackup({schema:2,lifts:{},runs:[]}),false)});
+

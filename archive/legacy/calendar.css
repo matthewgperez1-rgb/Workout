@@ -24,3 +24,4 @@
 .t7-options button:disabled{opacity:.4}
 .t7-calendar .t7-day:has(.t7-slot):hover{border-color:#b9cec2}
 @media(max-width:500px){.t7-calhead h2{font-size:21px}.t7-buttons button{padding:7px 9px}.t7-day{grid-template-columns:64px minmax(0,1fr);padding:11px;gap:8px}.t7-slot{padding:10px!important}.t7-slot strong{font-size:13px}}
+

@@ -1,0 +1,1 @@
+Archived original Range Board and prior Training Log source. These files are preserved for recovery and are not loaded by index.html or included in dist/. The historical training-core tests validate this archived helper only. Production analytics and progression use modules/analytics.mjs and do not require RIR input.

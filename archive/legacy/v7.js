@@ -110,3 +110,4 @@ today=function(){
   return '<div class="v6-home"><h2 class="v6-page-title">Today</h2><div class="v6-lanes">'+card('LIFT',sourceLift)+card('RUN',sourceRun)+'</div><div class="v6-home-next"><button data-tab-go="plan" onclick="view(this.dataset.tabGo)">View calendar →</button></div></div>';
 };
 })();
+

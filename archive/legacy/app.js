@@ -547,3 +547,4 @@ function renderLog(root) {
     if (confirm('Delete this log entry?')) { rbDeleteLog(btn.dataset.delLog); renderLog(root); }
   }));
 }
+

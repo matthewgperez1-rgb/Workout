@@ -39,3 +39,4 @@ export function runSummary(runs){
 }
 export function dedupeByDateId(runs){const map=new Map();for(const r of runs){const k=r.id||r.date;if(!map.has(k)||String(r.updated||'')>String(map.get(k).updated||''))map.set(k,r)}return [...map.values()]}
 export function validateBackup(value){return !!value&&value.schema===2&&Array.isArray(value.lifts)&&Array.isArray(value.runs)&&(!value.mobility||Array.isArray(value.mobility))}
+

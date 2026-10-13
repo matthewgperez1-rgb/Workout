@@ -28,7 +28,7 @@ jobs:
           node scripts/build.mjs
       - name: Install mobile browser engines
         run: |
-          npm install --no-save playwright@1.56.1
+          npm install --no-save playwright@1.56.1 axe-core@4.10.3
           npx playwright install --with-deps chromium webkit
       - name: Chromium functional and visual checks
         run: BROWSER=chromium node --test tests/browser.test.mjs

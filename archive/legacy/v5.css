@@ -55,3 +55,4 @@ details.t5-week>summary{padding:12px 4px;font-weight:700;display:flex;justify-co
 .tlg-timer-actions button{background:#38312a;color:#eee4d9}
 .tlg-timer-actions button.selected{background:#e29b77;color:#241b17}
 @media(max-width:390px){.t5-daybody{padding-left:0}.t5-day>summary{gap:7px}.t5-daylabel{width:45px}.t5-head span{font-size:11px}.t5-stat strong{font-size:20px}}
+

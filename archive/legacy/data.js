@@ -172,3 +172,4 @@ function rbMakeEmptyWorkout(dateISO, type) {
     completedAt: null
   };
 }
+

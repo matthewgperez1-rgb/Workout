@@ -79,3 +79,4 @@ nav button.active{background:#f5e8df;color:#b65138;border-top:2px solid #cf6548}
 .v6-home-next button{background:transparent;border:0;color:#aa4f35}
 @media(max-width:620px){.v6-lanes{grid-template-columns:1fr;gap:12px}.v6-lane{padding:14px}.v6-plan-top{align-items:center}.v6-plan-top h2{font-size:23px}.v6-now-card{padding:17px}}
 @media(max-width:370px){.v6-plan-top h2{font-size:20px}.v6-weekcontrols button{padding:5px 7px}.v6-now-card h2{font-size:20px}}
+
