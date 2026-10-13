@@ -110,7 +110,7 @@ export function profile(name){const canonical=aliases[name]||name;return catalog
 export function substitutes(e,all=catalog){const p=e.pattern||profile(e.name).pattern;return all.filter(x=>x.id!==(e.exerciseId||profile(e.name).id)&&x.pattern===p).sort((a,b)=>(b.group===profile(e.name).group)-(a.group===profile(e.name).group));}
 export function measurementFor(e){return e.unit||(/seconds/i.test(e.tip)?'sec':/meters/i.test(e.tip)?'m':/minutes/i.test(e.tip)?'min':profile(e.name).unit);}
 export const unitLabel=u=>({reps:'reps',sec:'seconds',m:'meters',min:'minutes'})[u]||'reps';
-export const loadLabel=e=>e.equipment==='Dumbbell'?'lb / hand':e.equipment==='Landmine'?'lb plates':e.equipment==='Bodyweight'?'added lb':'lb';
+export const loadLabel=e=>/assisted/i.test(e.name)?'assist lb':e.equipment==='Dumbbell'&&!/goblet|overhead dumbbell triceps|suitcase/i.test(e.name)?'lb / hand':e.equipment==='Landmine'?'lb plates':e.equipment==='Bodyweight'?'added lb':'lb';
 export const mobility=[
  {name:'Shoulders',duration:10,icon:'shoulder',moves:[['Wall slide','2 × 8'],['Scapular push-up','2 × 10'],['Thoracic rotation','2 × 6 / side'],['Band pull-apart','2 × 12']]},
  {name:'Back',duration:10,icon:'spine',moves:[['Cat-cow','2 × 8'],['Thoracic open book','2 × 6 / side'],['Bird dog','2 × 8 / side']]},
