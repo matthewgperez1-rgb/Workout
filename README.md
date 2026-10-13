@@ -20,7 +20,8 @@ Design references: Runna (weekly calendar and rescheduling), Liftosaur (compact 
 - **Running:** manual Garmin results (miles, time, perceived effort, optional heart rate/cadence).
 - **Mobility:** eight targeted, independent routines, separate from workout completion.
 - **History/Progress:** recorded workouts and totals only, not planned workouts.
-- **Settings:** JSON export/import and optional manual GitHub sync.
+- **Library:** 121 built-in exercises grouped by muscle group and equipment, available offline. Filter/search for substitutions, add sets to an existing workout, and replace exercises when equipment is occupied.
+- **Settings:** available from the Library screen; JSON export/import and optional manual GitHub sync.
 
 ## Storage compatibility
 
@@ -39,3 +40,7 @@ GitHub Actions runs Node syntax/regression checks and headless Chromium tests at
 - GitHub synchronization is **manual**, not automatic or conflict-merged.
 - The program is a starting template; strength programming has not been clinically validated or automatically adapted to every missed workout.
 - GitHub Pages needs to remain configured for Actions-based deployment.
+
+## Installed PWA and saving
+
+Training entries autosave to localStorage on the device as weights/reps are typed and checkboxes are changed. Installing the app to an iPhone home screen does **not** create a GitHub/cloud backup. Depending on iOS installation context, the installed PWA can have separate storage from Safari or an in-app browser, so export/import JSON when migrating existing records. Avoid relying on local storage as the sole copy of irreplaceable training history.
