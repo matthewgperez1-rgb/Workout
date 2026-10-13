@@ -65,15 +65,15 @@ test('rest timer offers 60 second option and mobility is independent',async()=>{
  await page.locator('[data-timer="60"]').click();
  assert.equal(await page.locator('#timer-value').innerText(),'1:00');
  await page.getByRole('button',{name:'Mobility'}).click();
- assert.equal(await page.locator('.mobility-card').count(),8);
+ assert.equal(await page.locator('.mobility-card').count(),9);
  assert.deepEqual(errors,[]);
  await page.close();
 });
 test('font and backgrounds remain readable without layered themes',async()=>{
  const {page}=await newPage();
  const styles=await page.evaluate(()=>({bg:getComputedStyle(document.body).backgroundColor,color:getComputedStyle(document.body).color,stylesheets:document.styleSheets.length}));
- assert.equal(styles.bg,'rgb(248, 247, 243)');
- assert.equal(styles.color,'rgb(25, 38, 32)');
+ assert.equal(styles.bg,'rgb(32, 37, 42)');
+ assert.equal(styles.color,'rgb(245, 245, 242)');
  assert.equal(styles.stylesheets,1);
  await page.close();
 });
