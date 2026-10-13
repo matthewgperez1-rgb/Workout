@@ -90,3 +90,38 @@ test('history expands saved strength session into completed weights and reps',as
  assert.deepEqual(errors,[]);
  await page.close();
 });
+
+test('exercise library filters by muscle and equipment, and opens movement details',async()=>{
+ const {page,errors}=await newPage();
+ await page.getByRole('button',{name:'Library'}).click();
+ assert.match(await page.locator('main').innerText(),/Exercise library/);
+ await page.locator('#lib-group').selectOption('Chest');
+ await page.locator('#lib-equip').selectOption('Dumbbell');
+ assert.ok(await page.locator('.lib-item').count()>=3);
+ await page.locator('#lib-search').fill('Incline');
+ assert.match(await page.locator('.lib-results').innerText(),/Incline dumbbell press/);
+ await page.locator('.lib-item').first().click();
+ assert.match(await page.locator('main').innerText(),/Movement reference/);
+ assert.deepEqual(errors,[]);
+ await page.close();
+});
+test('workout can replace an exercise or add one, and logs persist on device',async()=>{
+ const {page,errors}=await newPage();
+ await page.getByRole('button',{name:/Open workout/}).click();
+ await page.locator('.exercise-box').first().locator('summary').click();
+ await page.locator('[data-replace="0"]').click();
+ await page.locator('#lib-search').fill('Machine chest press');
+ await page.locator('.lib-item').first().click();
+ await page.locator('#lib-apply').click();
+ assert.match(await page.locator('.exercise-box').first().innerText(),/Machine chest press/);
+ await page.locator('#add-from-library').click();
+ await page.locator('#lib-search').fill('Pallof press');
+ await page.locator('.lib-item').first().click();
+ await page.locator('#lib-apply').click();
+ assert.match(await page.locator('.exercise-box').last().innerText(),/Pallof press/);
+ const logged=await page.evaluate(()=>JSON.parse(localStorage.getItem('rangeboard_v2')).lifts[0]);
+ assert.equal(logged.exercises[0].name,'Machine chest press');
+ assert.equal(logged.exercises.at(-1).name,'Pallof press');
+ assert.deepEqual(errors,[]);
+ await page.close();
+});
