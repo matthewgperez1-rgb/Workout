@@ -6,16 +6,22 @@ Baseline: a568323225e8e718f38549d98451f4b36ec2f48c, October 13, 2026. The origin
 
 | Check | Status | Evidence / limit |
 |---|---|---|
-| Syntax and pure storage/scheduling/date/analytics regressions | PASS | 35 Node tests at initial implementation |
-| Chromium interaction, persistence, import/export, substitutions, timer, offline restart | PENDING | Review-branch GitHub Actions |
-| WebKit engine interaction and layout | PENDING | Review-branch GitHub Actions; not physical Safari |
-| Real browser screenshots at 360/390/430px | PENDING | QA artifact, must be visually inspected |
+| Syntax and pure storage/scheduling/date/analytics regressions | PASS | 38 Node tests (21 production model checks and 17 retained historical regressions) |
+| Chromium interaction, persistence, import/export, substitutions, timer, offline restart | PASS | 18 browser checks; review QA run 38353181381 |
+| WebKit engine interaction and layout | PASS | 18 browser checks; not physical Safari |
+| Real browser screenshots at 360/390/430px | PASS | Actual Chromium/WebKit screenshots visually inspected; honest empty-state captures |
 | Old schema 2 roundtrip / recovery copy | PASS | Original numeric values and notes retained in fixture roundtrip |
 | Actual user phone dataset migrated | NOT RUN | App remains compatible; exact records require the user’s exported dataset |
 | Physical iPhone Safari / installed iOS PWA | NOT RUN | No physical iPhone is connected to this environment |
-| Simulated 60-minute rest timer and pause/restart | PENDING | Browser clock test |
+| Simulated 60-minute rest timer and pause/restart | PASS | Deadline-based timer survives pause, navigation and restart in both engines |
 | Real 45–60-minute gym workout | NOT RUN | Cannot substitute browser automation for a human gym session |
-| Production source / deployment alignment | PENDING | Verify main SHA, QA, Pages deployment and live app |
+| Production source / deployment alignment | RELEASE GATE | Pages publishes only a successful QA commit matching main; final deployment and live confirmation are required at delivery |
+
+## Browser-test scope
+
+Chromium and WebKit each run 18 checks. Accessibility labels, semantics and contrast checks use axe WCAG 2 A/AA and 2.1 AA tags. A 390×480 reduced viewport checks focused set inputs against the sticky timer and bottom navigation; this is a keyboard-height simulation, not an actual iOS keyboard.
+
+WebKit offline navigation uses a stopped origin server because Playwright offline emulation rejects even service-worker-only navigation (upstream issue: https://github.com/microsoft/playwright/issues/42775). No server is listening during that recovery assertion. Chromium additionally uses setOffline(true). Mocked GitHub network tests block service workers to make request interception reliable, as recommended in Playwright network documentation. These tests use TEST_ONLY_TOKEN and never send a real credential.
 
 ## Red-team risks addressed
 
