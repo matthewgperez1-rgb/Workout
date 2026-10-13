@@ -25,6 +25,7 @@ jobs:
         run: |
           node --check app.mjs
           node --check program.mjs
+          node --check exercise-library.mjs
           node --check sw.js
           node --test tests/domain.test.mjs tests/training-core.test.mjs
       - name: Install headless browser testing tools
@@ -39,6 +40,7 @@ jobs:
           test -s app.css
           test -s app.mjs
           test -s program.mjs
+          test -s exercise-library.mjs
           test -s manifest.webmanifest
           node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8'))"
           grep -q 'src="./app.mjs"' index.html
