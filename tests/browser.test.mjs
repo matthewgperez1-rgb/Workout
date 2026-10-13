@@ -52,7 +52,7 @@ test('live strength log saves set and preserves it after leaving',async()=>{
  await page.locator('[data-field="weight"]').first().fill('30');
  await page.locator('[data-field="weight"]').first().dispatchEvent('change');
  await page.locator('[data-field="done"]').first().check();
- await page.getByRole('button',{name:'Today'}).click();
+ await page.locator('[data-page="today"]').click();
  await page.getByRole('button',{name:/Open workout/}).click();
  assert.equal(await page.locator('[data-field="weight"]').first().inputValue(),'30');
  assert.equal(await page.locator('[data-field="done"]').first().isChecked(),true);
