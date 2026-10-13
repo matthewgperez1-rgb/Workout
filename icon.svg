@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="42" fill="#20282c"/><circle cx="127" cy="59" r="35" fill="#ff9251"/><path d="M19 154 81 49 118 104 140 82 183 154H19Z" fill="#fff8e9"/><path d="m54 154 28-47 26 47H82l-12-21-12 21Z" fill="#3e7564"/><path d="m120 154 24-39 39 39Z" fill="#b8ebce"/><path d="M19 154h164" stroke="#ff9251" stroke-width="4"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Training Log mountain sunrise logo">
+<rect width="1024" height="1024" rx="200" fill="#20282C"/>
+<circle cx="675" cy="315" r="185" fill="#FF9254"/>
+<path d="M100 811 432 261 630 555 746 438 971 811Z" fill="#FFF8E9"/>
+<path d="m294 811 143-241 134 241H431l-58-102-60 102Z" fill="#407867"/>
+<path d="m646 811 122-197 203 197Z" fill="#B5EACD"/>
+<path d="M101 821H976" stroke="#FF9254" stroke-width="21"/>
+</svg>
