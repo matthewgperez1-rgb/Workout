@@ -1,3 +1,4 @@
+import {exercises,muscleGroups} from './exercise-library.mjs';
 import {sessions,runSpecs} from './program.mjs';
 const KEY='rangeboard_v2',TZ='America/New_York';
 const fmt=n=>String(n).padStart(2,'0');
@@ -12,6 +13,7 @@ let data=fresh();try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');i
 data.moves={lift:{},run:{},...data.moves};data.mobility??=[];data.overrides??={};
 function save(){data.updated=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify(data));return true}catch{alert('Storage is full or unavailable. Export your records before leaving.');return false}}
 const app=document.querySelector('#app');
+let libraryGroup='All',libraryQuery='',libraryEquip='All',libraryMode=null;
 let page='today',selected=eastern(),weekShift=0,detail=null,activeLift=null,activeMobility=null,interval=null,timerUntil=0,timerRemaining=60,timerPreset=60;
 const icons={
  today:'<path d="M3 10.5 12 3l9 7.5V21h-6v-7H9v7H3z"/>',
@@ -23,7 +25,7 @@ const icons={
  settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2"/>'
 };
 function icon(id){return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[id]+'</svg>'}
-const nav=[['today','Today','today'],['calendar','Plan','calendar'],['history','History','history'],['progress','Progress','progress'],['mobility','Mobility','mobility'],['settings','Settings','settings']];
+const nav=[['today','Today','today'],['calendar','Plan','calendar'],['history','History','history'],['progress','Progress','progress'],['mobility','Mobility','mobility'],['library','Library','settings']];
 function chrome(body){app.innerHTML='<div class="shell"><header class="top"><div class="brand"><div class="mark">↗</div><span>TRAINING LOG</span></div><div class="top-time" id="nowTime"></div></header><main class="main" id="main">'+body+'</main><nav class="bottom">'+nav.map(([id,label,symbol])=>'<button data-page="'+id+'" class="'+(page===id?'active':'')+'" aria-label="'+label+'">'+icon(symbol)+'<span>'+label+'</span></button>').join('')+'</nav></div>';document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));clock()}
 function clock(){const n=document.getElementById('nowTime');if(n)n.textContent=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'}).format(new Date())}
 setInterval(clock,30000);
@@ -133,9 +135,10 @@ function liftPage(){
  document.getElementById('timer-reset').onclick=()=>{timerUntil=0;timerRemaining=timerPreset;timerTick()};
  document.querySelectorAll('[data-field]').forEach(input=>input.addEventListener('change',()=>{const s=log.exercises[+input.dataset.e].sets[+input.dataset.s];s[input.dataset.field]=input.type==='checkbox'?input.checked:Math.max(0,Number(input.value));save()}));
  document.querySelectorAll('[data-stage]').forEach(input=>input.onchange=()=>{const a=log.stages[input.dataset.stage]||[];const i=Number(input.dataset.index);log.stages[input.dataset.stage]=input.checked?[...new Set([...a,i])]:a.filter(x=>x!==i);save()});
+ const addExercise=document.createElement('button');addExercise.className='ghost';addExercise.textContent='+ Add exercise';addExercise.id='add-from-library';document.querySelector('.exercise-box:last-of-type')?.after(addExercise);addExercise.onclick=()=>chooseLibrary(null);
  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const e=log.exercises[+b.dataset.add],last=e.sets.at(-1);e.sets.push({...last,done:false});save();render()});
  document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{const e=log.exercises[+b.dataset.remove];if(e.sets.length>1){if(e.sets.at(-1).done&&!confirm('Remove a completed set?'))return;e.sets.pop();save();render()}});
- document.querySelectorAll('[data-replace]').forEach(b=>b.onclick=()=>{const e=log.exercises[+b.dataset.replace],s=prompt('Replacement exercise',e.name);if(s?.trim()){e.name=s.trim().slice(0,80);save();render()}});
+ document.querySelectorAll('[data-replace]').forEach(b=>b.onclick=()=>chooseLibrary(Number(b.dataset.replace)));
  document.getElementById('lift-notes').onchange=e=>{log.notes=e.target.value;save()};
  document.getElementById('save-lift').onclick=()=>go('today');
  document.getElementById('complete-lift').onclick=()=>{if(!log.exercises.some(e=>e.sets.some(s=>s.done)))return alert('Mark at least one completed set.');log.finished=true;save();go('today')}
@@ -176,6 +179,46 @@ async function showReference(button){
 }
 const photoControl=name=>'<div class="photo-control"><button type="button" class="photo-button" data-exercise="'+esc(name)+'">View demonstration</button><div class="photo-result"></div></div>';
 function attachPhotoControls(){document.querySelectorAll('[data-exercise]').forEach(b=>b.onclick=()=>showReference(b))}
+function libraryPage(){
+ const groups=['All',...muscleGroups];
+ const equipment=['All',...new Set(exercises.map(x=>x.equipment))].sort((a,b)=>a==='All'?-1:b==='All'?1:a.localeCompare(b));
+ const filtered=exercises.filter(x=>(libraryGroup==='All'||x.group===libraryGroup)&&(libraryEquip==='All'||x.equipment===libraryEquip)&&x.name.toLowerCase().includes(libraryQuery.toLowerCase()));
+ chrome('<div class="view-head"><div class="eyebrow">EXERCISE OPTIONS</div><h1 class="title">Exercise library.</h1><p class="subtitle">'+exercises.length+' movements · Find an alternative when equipment is busy.</p></div>'+
+ '<div class="lib-head"><input id="lib-search" class="textfield" type="search" placeholder="Search exercises" value="'+esc(libraryQuery)+'" aria-label="Search exercises"><button class="ghost small" id="lib-settings">Settings</button></div>'+
+ '<div class="lib-filters"><label>Muscle group<select id="lib-group" class="textfield">'+groups.map(x=>'<option '+(x===libraryGroup?'selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label>'+
+ '<label>Equipment<select id="lib-equip" class="textfield">'+equipment.map(x=>'<option '+(x===libraryEquip?'selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label></div>'+
+ (libraryMode?'<div class="lib-context"><strong>'+(libraryMode.replace?'Replace exercise':'Add to workout')+'</strong><button class="ghost small" id="lib-cancel">Cancel</button></div>':'')+
+ '<div class="lib-results">'+filtered.map(x=>'<button class="lib-item" data-exname="'+esc(x.name)+'"><span class="lib-item-main"><strong>'+esc(x.name)+'</strong><small>'+esc(x.group)+' · '+esc(x.equipment)+'</small></span><span class="lib-arrow">›</span></button>').join('')+(filtered.length?'':'<p class="note">No matching exercise. Try a different filter.</p>')+'</div>');
+ document.getElementById('lib-search').oninput=e=>{const start=e.target.selectionStart;libraryQuery=e.target.value;const section=document.querySelector('.lib-results');const found=exercises.filter(x=>(libraryGroup==='All'||x.group===libraryGroup)&&(libraryEquip==='All'||x.equipment===libraryEquip)&&x.name.toLowerCase().includes(libraryQuery.toLowerCase()));section.innerHTML=found.map(x=>'<button class="lib-item" data-exname="'+esc(x.name)+'"><span class="lib-item-main"><strong>'+esc(x.name)+'</strong><small>'+esc(x.group)+' · '+esc(x.equipment)+'</small></span><span class="lib-arrow">›</span></button>').join('')||'<p class="note">No matching exercise.</p>';bindLibraryResults()};
+ document.getElementById('lib-group').onchange=e=>{libraryGroup=e.target.value;render()};
+ document.getElementById('lib-equip').onchange=e=>{libraryEquip=e.target.value;render()};
+ document.getElementById('lib-settings').onclick=()=>go('settings');
+ document.getElementById('lib-cancel')?.addEventListener('click',()=>{libraryMode=null;page='lift';render()});
+ bindLibraryResults()
+}
+function bindLibraryResults(){document.querySelectorAll('[data-exname]').forEach(b=>b.onclick=()=>openExercise(b.dataset.exname))}
+function openExercise(name){
+ const record=exercises.find(x=>x.name===name);if(!record)return;
+ chrome('<button class="ghost small" id="lib-back">← Library</button><div class="view-head"><div class="eyebrow">'+esc(record.group)+' · '+esc(record.equipment)+'</div><h1 class="title">'+esc(name)+'</h1></div><div class="info-panel"><h3>Movement reference</h3><p>Check the specific variation and adjust load for your available equipment.</p>'+photoControl(name)+'</div><div class="actions">'+(libraryMode?'<button class="solid" id="lib-apply">'+(libraryMode.replace?'Use instead':'Add to workout')+'</button>':'<button class="solid" id="lib-add">Add to today’s lift</button>')+'</div>');
+ document.getElementById('lib-back').onclick=()=>libraryPage();
+ document.getElementById('lib-add')?.addEventListener('click',()=>{const current=data.lifts.find(x=>x.date===selected);if(!current)return alert('Start today’s lift first, then add an exercise.');libraryMode={logId:current.id,replace:null};applyLibraryExercise(name)});
+ document.getElementById('lib-apply')?.addEventListener('click',()=>applyLibraryExercise(name));
+ attachPhotoControls()
+}
+function applyLibraryExercise(name){
+ const intent=libraryMode;const log=data.lifts.find(x=>x.id===intent?.logId);if(!log)return alert('Workout unavailable. Return to your session.');
+ const i=intent.replace;
+ const replacement={name,category:exercises.find(x=>x.name===name)?.group||'',tip:'',sets:Array.from({length:i===null?3:Math.max(1,log.exercises[i]?.sets.length||3)},(_,j)=>({weight:priorSet(name,log.date)?.weight??0,reps:i===null?8:log.exercises[i].sets[j]?.reps??8,done:false}))};
+ if(i!==null){if(log.exercises[i].sets.some(s=>s.done)&&!confirm('Replacing this exercise will discard its completed sets. Continue?'))return;log.exercises[i]=replacement}
+ else log.exercises.push(replacement);
+ if(!save())return;
+ libraryMode=null;activeLift=log.id;selected=log.date;page='lift';render();
+}
+function chooseLibrary(replaceIndex=null){
+ const log=currentLog();if(!log)return;
+ libraryMode={logId:log.id,replace:replaceIndex};
+ libraryGroup='All';libraryEquip='All';libraryQuery='';page='library';render();
+}
 function mobilityPage(){chrome('<div class="view-head"><div class="eyebrow">OPTIONAL SESSIONS</div><h1 class="title">Move better.</h1><p class="subtitle">Separate from strength and running.</p></div><div class="mobility-grid">'+mobility.map(([name,duration],i)=>'<button class="mobility-card" data-mob="'+i+'"><i>'+['◉','≋','⌁','↔','◌','▰','⟡','☼','⊕'][i]+'</i><div><b>'+name+'</b><span>'+duration+' min</span></div></button>').join('')+'</div>');document.querySelectorAll('[data-mob]').forEach(b=>b.onclick=()=>{page='routine';activeMobility=+b.dataset.mob;render()})}
 function routinePage(){const m=mobility[activeMobility],date=selected,existing=data.mobility.find(x=>x.date===date&&x.program===m[0]);if(!m){go('mobility');return}
  chrome('<button id="backmob" class="ghost small">← Mobility</button><div class="view-head"><div class="eyebrow">MOBILITY · '+m[1]+' MIN</div><h1 class="title">'+m[0]+'</h1></div><div class="info-panel">'+m[2].map(([name,dose],i)=>'<label class="flow-item"><input type="checkbox" data-mstep="'+i+'" '+(existing?.checks?.includes(i)?'checked':'')+'><span>'+esc(name)+'<small>'+dose+'</small></span></label>'+photoControl(name)).join('')+'</div><button class="solid" id="savemob">Save routine</button>');
@@ -228,5 +271,5 @@ function settingsPage(){
  const git=async pull=>{const repo=document.getElementById('repo').value.trim(),token=document.getElementById('token').value.trim(),out=document.getElementById('sync-status');if(!/^[\w.-]+\/[\w.-]+$/.test(repo)||!token)return alert('Enter a valid repository and token.');if(pull&&!confirm('This replaces local records. Export a backup first. Continue?'))return;localStorage.setItem('training_repo',repo);out.textContent='Contacting GitHub…';try{const headers={Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},url='https://api.github.com/repos/'+repo+'/contents/training-data.json';const get=await fetch(url,{headers,cache:'no-store'});if(pull){if(!get.ok)throw Error('No backup: HTTP '+get.status);const meta=await get.json(),raw=atob(meta.content.replace(/\s/g,'')),bytes=Uint8Array.from(raw,c=>c.charCodeAt(0)),next=JSON.parse(new TextDecoder().decode(bytes));if(next.schema!==2||!Array.isArray(next.lifts)||!Array.isArray(next.runs))throw Error('Invalid backup');data={...fresh(),...next};save();out.textContent='Restored successfully';return}if(!get.ok&&get.status!==404)throw Error('GitHub: HTTP '+get.status);const old=get.ok?await get.json():null;const content=new TextEncoder().encode(JSON.stringify(data)),b64=btoa(Array.from(content,b=>String.fromCharCode(b)).join(''));const payload={message:'Update training records',content:b64,...(old?{sha:old.sha}:{})};const write=await fetch(url,{method:'PUT',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!write.ok)throw Error('Backup failed: HTTP '+write.status);out.textContent='Backed up successfully'}catch(e){out.textContent=e.message}};
  document.getElementById('push').onclick=()=>git(false);document.getElementById('pull').onclick=()=>git(true)
 }
-function render(){if(page==='today')todayPage();else if(page==='calendar')calendarPage();else if(page==='lift')liftPage();else if(page==='run')editRun(selected,planned('run',selected));else if(page==='history')historyPage();else if(page==='progress')progressPage();else if(page==='mobility')mobilityPage();else if(page==='routine')routinePage();else settingsPage()}
+function render(){if(page==='today')todayPage();else if(page==='calendar')calendarPage();else if(page==='lift')liftPage();else if(page==='run')editRun(selected,planned('run',selected));else if(page==='history')historyPage();else if(page==='progress')progressPage();else if(page==='mobility')mobilityPage();else if(page==='library')libraryPage();else if(page==='routine')routinePage();else settingsPage()}
 render();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
