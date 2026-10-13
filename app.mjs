@@ -51,7 +51,7 @@ function todayPage(){
  const strip=Array.from({length:7},(_,i)=>{const date=plus(start,i),l=planned('lift',date),r=planned('run',date);return '<button class="daychip '+(date===selected?'active':'')+'" data-date="'+date+'"><small>'+pretty(date,{weekday:'short'}).toUpperCase()+'</small><strong>'+date.slice(-2)+'</strong><span class="dotset">'+(l?'<i class="dot"></i>':'')+(r?'<i class="dot run"></i>':'')+'</span></button>'}).join('');
  chrome('<div class="view-head"><div class="eyebrow">'+pretty(selected,{weekday:'long',month:'long',day:'numeric'})+'</div><h1 class="title">Your training.</h1></div><div class="today-stack">'+lift+run+'</div><h3 class="section-title">This week</h3><div class="weekstrip">'+strip+'</div>');
  document.querySelectorAll('[data-date]').forEach(b=>b.onclick=()=>{selected=b.dataset.date;render()});
- document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openSession(b.dataset.open,selected));
+ document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>b.dataset.open==='lift'?editLift(selected,planned('lift',selected)):openSession('run',selected));
  const free=document.querySelector('[data-free-run]');if(free)free.onclick=()=>editRun(selected,null)
 }
 function calendarPage(){
