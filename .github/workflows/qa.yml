@@ -21,17 +21,11 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Validate JavaScript syntax and regression tests
+      - name: Validate source and regression tests
         run: |
-          node --check tests/domain.test.mjs
-          node --check training-core.mjs
-          node --check enhancements.js
-          node --check v4.js
-          node --check v5.js
-          node --check v6.js
-          node --check v7.js
+          node --check app.mjs
+          node --check program.mjs
           node --check sw.js
-          node --check tests/training-core.test.mjs
           node --test tests/domain.test.mjs tests/training-core.test.mjs
       - name: Install headless browser testing tools
         run: |
@@ -39,19 +33,12 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Test app interactions on mobile-sized Chromium
         run: node --test tests/browser.test.mjs
-      - name: Validate app assets and embedded JavaScript
+      - name: Validate production assets
         run: |
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          import vm from 'node:vm';
-          const html=fs.readFileSync('index.html','utf8');
-          const match=html.match(/<script>([\s\S]*?)<\/script>/);
-          if(!match)throw Error('Missing application script');
-          new vm.Script(match[1],{filename:'index.html embedded JS'});
-          for(const p of ['manifest.webmanifest','fixes.css','v3.css','training-core.mjs','enhancements.js','sw.js','icon.svg','v4.css','v4.js','v5.css','v5.js','v6.css','v6.js','v7.css','v7.js','calendar.css']) if(!fs.existsSync(p))throw Error('Missing '+p);
-          JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
-          if (!html.includes('src="v4.js"')) throw Error('New UI bundle not loaded');
-          if (!html.includes('src="enhancements.js"')) throw Error('Enhancement bundle not loaded');
-          if (!html.includes('name="viewport"')) throw Error('Missing mobile viewport');
-          console.log('App syntax and required assets validated');
-          NODE
+          test -s index.html
+          test -s app.css
+          test -s app.mjs
+          test -s program.mjs
+          test -s manifest.webmanifest
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8'))"
+          grep -q 'src="./app.mjs"' index.html
