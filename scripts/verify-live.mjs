@@ -19,7 +19,7 @@ async function files(dir) {
   return result;
 }
 try {
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, timezoneId: 'America/New_York', serviceWorkers: 'block', extraHTTPHeaders: { 'Cache-Control': 'no-cache' } });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, timezoneId: 'America/New_York', serviceWorkers: 'allow', extraHTTPHeaders: { 'Cache-Control': 'no-cache' } });
   for (const file of await files('dist')) {
     const relative = file.slice('dist/'.length).split(path.sep).join('/');
     const response = await context.request.get(new URL(relative + '?release=' + release, url).href);
