@@ -48,7 +48,7 @@ jobs:
           const match=html.match(/<script>([\s\S]*?)<\/script>/);
           if(!match)throw Error('Missing application script');
           new vm.Script(match[1],{filename:'index.html embedded JS'});
-          for(const p of ['manifest.webmanifest','fixes.css','v3.css','training-core.mjs','enhancements.js','sw.js','icon.svg','v4.css','v4.js','v5.css','v5.js','v6.css','v6.js','v7.css','v7.js']) if(!fs.existsSync(p))throw Error('Missing '+p);
+          for(const p of ['manifest.webmanifest','fixes.css','v3.css','training-core.mjs','enhancements.js','sw.js','icon.svg','v4.css','v4.js','v5.css','v5.js','v6.css','v6.js','v7.css','v7.js','calendar.css']) if(!fs.existsSync(p))throw Error('Missing '+p);
           JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
           if (!html.includes('src="v4.js"')) throw Error('New UI bundle not loaded');
           if (!html.includes('src="enhancements.js"')) throw Error('Enhancement bundle not loaded');
