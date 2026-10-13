@@ -77,3 +77,13 @@ test('font and backgrounds remain readable without layered themes',async()=>{
  assert.equal(styles.stylesheets,1);
  await page.close();
 });
+
+test('visual audit captures dashboard and calendar',async()=>{
+ const {page}=await newPage();
+ const home=await page.screenshot({type:'jpeg',quality:48});
+ console.log('VISUAL_HOME='+home.toString('base64'));
+ await page.getByRole('button',{name:'Plan'}).click();
+ const cal=await page.screenshot({type:'jpeg',quality:48});
+ console.log('VISUAL_CALENDAR='+cal.toString('base64'));
+ await page.close();
+});
