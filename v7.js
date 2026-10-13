@@ -105,8 +105,8 @@ today=function(){
   const data=kind==='RUN'?runSpecs[source]:plan(source);
   const name=kind==='RUN'?data[0]:data.name;
   const detail=kind==='RUN'?data[1]+' min planned':data.moves.length+' exercises';
-  return '<section class="v6-now-card"><div class="tag">'+kind+'</div><h2>'+escapeHTML(name)+'</h2><p>'+detail+'</p><button class="primary" onclick="window.t7Open(\\''+(kind==='RUN'?'run':'lift')+'\\',\\''+currentDate+'\\')">Open session</button></section>';
+   return '<section class="v6-now-card"><div class="tag">'+kind+'</div><h2>'+escapeHTML(name)+'</h2><p>'+detail+'</p><button class="primary" data-kind="'+(kind==='RUN'?'run':'lift')+'" data-date="'+currentDate+'" onclick="window.t7Open(this.dataset.kind,this.dataset.date)">Open session</button></section>';
  };
- return '<div class="v6-home"><h2 class="v6-page-title">Today</h2><div class="v6-lanes">'+card('LIFT',sourceLift)+card('RUN',sourceRun)+'</div><div class="v6-home-next"><button onclick="view(\\'plan\\')">View calendar →</button></div></div>';
+  return '<div class="v6-home"><h2 class="v6-page-title">Today</h2><div class="v6-lanes">'+card('LIFT',sourceLift)+card('RUN',sourceRun)+'</div><div class="v6-home-next"><button data-tab-go="plan" onclick="view(this.dataset.tabGo)">View calendar →</button></div></div>';
 };
 })();
