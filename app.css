@@ -17,14 +17,14 @@ h1,h2,h3,h4{font-family:'Manrope',system-ui,sans-serif;letter-spacing:-.043em}
 .main{padding:12px 20px 125px}
 .bottom{position:fixed;z-index:30;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e6e8e3;padding:7px max(10px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:3px;box-shadow:0 -5px 30px #24362b0a}
 .bottom button{flex:1;max-width:165px;padding:9px 2px;background:transparent;border:0;color:#79837d;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10px;font-weight:750}
-.bottom button.active{color:#e76131}
+.bottom button.active{color:#a84523}
 .bottom svg{width:21px;height:21px}
-.eyebrow{font-size:10px;font-weight:850;letter-spacing:.18em;text-transform:uppercase;color:#e35f32}
+.eyebrow{font-size:10px;font-weight:850;letter-spacing:.18em;text-transform:uppercase;color:#a84523}
 .title{font-size:34px;line-height:1.06;letter-spacing:-.055em;margin:8px 0 12px}
 .subtitle{font-size:14px;color:#788178;line-height:1.55}
 .view-head{margin:11px 0 23px}
 .solid{background:#192a20;color:white;border:0;border-radius:12px;padding:12px 17px;font-weight:800;min-height:45px}
-.accent{background:#ed6b39;color:#fff;border:0;border-radius:12px;padding:12px 17px;min-height:45px;font-weight:800}
+.accent{background:#bd4c25;color:#fff;border:0;border-radius:12px;padding:12px 17px;min-height:45px;font-weight:800}
 .ghost{background:transparent;color:#24392c;border:1px solid #d7ddd5;border-radius:12px;padding:10px 14px;min-height:41px;font-weight:700}
 .small{font-size:12px;padding:8px 11px;min-height:36px}
 .stage{background:#1b2a21;color:#fff;border-radius:24px;padding:25px;margin:13px 0 16px;position:relative;overflow:hidden}
@@ -63,8 +63,8 @@ h1,h2,h3,h4{font-family:'Manrope',system-ui,sans-serif;letter-spacing:-.043em}
 .session{display:flex;gap:11px;align-items:center;text-align:left;width:100%;background:#f3f6f1;border:0;border-left:3px solid #2d7057;border-radius:10px;padding:12px 10px}
 .session.run{background:#fff4eb;border-color:#ed7540}
 .session-content{flex:1;min-width:0}
-.session-kind{font-size:9px;letter-spacing:.11em;font-weight:850;color:#608374}
-.session.run .session-kind{color:#ce6937}
+.session-kind{font-size:9px;letter-spacing:.11em;font-weight:850;color:#386e56}
+.session.run .session-kind{color:#994a20}
 .session h4{font-size:13px;color:#273329;line-height:1.3;margin:3px 0}
 .session p{font-size:11px;color:#6c796f}
 .arrow{font-size:20px;color:#89978d;font-weight:600}
