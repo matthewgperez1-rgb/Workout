@@ -37,4 +37,18 @@ jobs:
           path: dist
       - id: deployment
         uses: actions/deploy-pages@v4
-
+      - name: Install production browser verification
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify the actual published application
+        env:
+          TRAINING_LOG_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node scripts/verify-live.mjs
+      - name: Preserve actual production browser captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-log-production-verification
+          path: qa-production/
+          retention-days: 14
