@@ -85,5 +85,9 @@ test('visual audit captures dashboard and calendar',async()=>{
  await page.getByRole('button',{name:'Plan'}).click();
  const cal=await page.screenshot({type:'jpeg',quality:48});
  console.log('VISUAL_CALENDAR='+cal.toString('base64'));
+ await page.locator('[data-page="today"]').click();
+ await page.getByRole('button',{name:/Open workout/}).click();
+ const lift=await page.screenshot({type:'jpeg',quality:48});
+ console.log('VISUAL_LIFT='+lift.toString('base64'));
  await page.close();
 });
