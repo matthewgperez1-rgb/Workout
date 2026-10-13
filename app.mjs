@@ -22,10 +22,11 @@ const icons={
  history:'<path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l4 2"/>',
  progress:'<path d="M3 20h18M5 16l5-6 4 3 5-8"/>',
  mobility:'<circle cx="12" cy="4" r="2"/><path d="M4 11l8-3 8 3M12 8v8M6 21l6-5 6 5"/>',
+ library:'<path d="M3 5.5C6.5 4.5 9.5 4.9 12 7c2.5-2.1 5.5-2.5 9-1.5V20c-3.5-1-6.5-.6-9 1.5C9.5 19.4 6.5 19 3 20zM12 7v14"/>',
  settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2"/>'
 };
 function icon(id){return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[id]+'</svg>'}
-const nav=[['today','Today','today'],['calendar','Plan','calendar'],['history','History','history'],['progress','Progress','progress'],['mobility','Mobility','mobility'],['library','Library','settings']];
+const nav=[['today','Today','today'],['calendar','Plan','calendar'],['history','History','history'],['progress','Progress','progress'],['mobility','Mobility','mobility'],['library','Library','library']];
 function chrome(body){app.innerHTML='<div class="shell"><header class="top"><div class="brand"><div class="mark"><svg viewBox="0 0 48 48" aria-label="Training Log logo" role="img"><circle cx="31" cy="15" r="9" fill="#fd9452"/><path d="M4 37 20 14 28 27 33 21 45 37H4Z" fill="#fff8ed"/><path d="m13 37 7-12 6 12h-6l-2-5-3 5z" fill="#31574c"/><path d="m30 37 6-9 9 9H30Z" fill="#baefd1"/></svg></div><span>TRAINING LOG</span></div><div class="top-time" id="nowTime"></div></header><main class="main" id="main">'+body+'</main><nav class="bottom">'+nav.map(([id,label,symbol])=>'<button data-page="'+id+'" class="'+(page===id?'active':'')+'" aria-label="'+label+'">'+icon(symbol)+'<span>'+label+'</span></button>').join('')+'</nav></div>';document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));clock()}
 function clock(){const n=document.getElementById('nowTime');if(n)n.textContent=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'}).format(new Date())}
 setInterval(clock,30000);
