@@ -40,4 +40,55 @@ sessionEditor=function(date){
   if(title)title.style.fontSize='16px';
  });
 };
+db.moves ||= {run:{},lift:{}};
+const movedSource=(type,date)=>{
+ const mapping=db.moves[type];
+ const origin=Object.keys(mapping).find(k=>mapping[k]===date);
+ if(origin)return origin;
+ if(mapping[date])return null;
+ return type==='run'?(runSpecs[date]?date:null):(plan(date)?.moves.length?date:null);
+};
+const plusDays=(date,days)=>{const x=new Date(date+'T12:00:00');x.setDate(x.getDate()+days);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const shortDate=date=>new Date(date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+let weekShift=0;
+planView=function(){
+ const base=plusDays(currentDate,weekShift*7);
+ const d=new Date(base+'T12:00:00'),mon=plusDays(base,-((d.getDay()+6)%7));
+ let days='';
+ for(let i=0;i<7;i++){
+  const date=plusDays(mon,i),run=movedSource('run',date),lift=movedSource('lift',date);
+  const liftPlan=lift?plan(lift):null,runPlan=run?runSpecs[run]:null;
+  let cards='';
+  if(liftPlan?.moves.length)cards+='<button class="t7-slot" onclick="window.t7Open(\'lift\',\''+date+'\')"><span>LIFT</span><strong>'+escapeHTML(liftPlan.name)+'</strong><small>'+liftPlan.moves.length+' movements</small></button>';
+  if(runPlan)cards+='<button class="t7-slot" onclick="window.t7Open(\'run\',\''+date+'\')"><span>RUN</span><strong>'+escapeHTML(runPlan[0])+'</strong><small>'+runPlan[1]+' min</small></button>';
+  days+='<div class="t7-day"><div class="t7-daydate">'+shortDate(date)+'</div><div class="t7-slots">'+(cards||'<span class="t7-rest">Available / recovery</span>')+'</div></div>';
+ }
+ return '<section class="t7-calendar"><div class="t7-calhead"><h2>Training calendar</h2><div class="t7-buttons"><button onclick="window.t7MoveWeek(-1)">←</button><button onclick="window.t7Today()">Today</button><button onclick="window.t7MoveWeek(1)">→</button></div></div><div class="t7-days">'+days+'</div></section>';
+};
+window.t7MoveWeek=n=>{weekShift=Math.max(-2,Math.min(16,weekShift+n));render()};
+window.t7Today=()=>{weekShift=0;render()};
+window.t7Open=(type,date)=>{
+ const source=movedSource(type,date);if(!source)return;
+ const workout=type==='run'?runSpecs[source]:plan(source);
+ const name=type==='run'?workout[0]:workout.name;
+ const body=type==='run'?'<p>'+workout[1]+' minutes · '+escapeHTML(workout[2])+'</p>':workout.moves.map(m=>'<div class="t7-movement"><span>'+escapeHTML(m[0])+'</span><b>'+m[1]+' × '+m[2]+'</b></div>').join('');
+ el('main').innerHTML='<div class="card"><button onclick="view(\'plan\')">← Calendar</button><p class="tag">'+type.toUpperCase()+'</p><h2>'+escapeHTML(name)+'</h2>'+body+'<div class="actions"><button class="primary" onclick="window.t7Log(\''+type+'\',\''+date+'\')">'+(type==='run'?'Log Garmin results':'Open lifting log')+'</button><button onclick="window.t7Reschedule(\''+type+'\',\''+source+'\')">Move to another day</button></div></div>';
+};
+window.t7Log=(type,date)=>{currentDate=date;view('today');if(type==='run')runEditor(date);else sessionEditor(date)};
+window.t7Reschedule=(type,source)=>{
+ const options=Array.from({length:15},(_,i)=>plusDays(source,i-7));
+ const markup=options.map(date=>{
+ const occupied=movedSource(type,date),blocked=occupied&&occupied!==source;
+ return '<button '+(blocked?'disabled':'')+' onclick="window.t7ConfirmMove(\''+type+'\',\''+source+'\',\''+date+'\')">'+shortDate(date)+(blocked?' · occupied':'')+'</button>';
+ }).join('');
+ el('main').innerHTML='<div class="card"><button onclick="view(\'plan\')">← Calendar</button><h2>Move '+type+'</h2><p>Changes your Training Log calendar only, not Tredict.</p><div class="t7-options">'+markup+'</div></div>';
+};
+window.t7ConfirmMove=(type,source,date)=>{
+ if(movedSource(type,date)&&movedSource(type,date)!==source)return;
+ if(type==='run'&&db.runs.some(r=>r.date===source)){alert('Recorded runs cannot be rescheduled.');return}
+ if(type==='lift'&&db.lifts.some(r=>r.date===source)){alert('Started lifts cannot be rescheduled.');return}
+ if(date===source)delete db.moves[type][source];else db.moves[type][source]=date;
+ persist();view('plan');
+};
+
 })();
