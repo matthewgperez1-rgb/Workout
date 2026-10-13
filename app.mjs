@@ -127,7 +127,7 @@ function liftPage(){
  const day=weekday(log.date);
  const done=log.exercises.flatMap(e=>e.sets).filter(s=>s.done).length;
  chrome('<div class="lift-header"><button class="ghost small" id="exit-lift">← Today</button><div class="eyebrow" style="margin-top:14px">WEEK '+phase+' · '+done+' COMPLETED SETS</div><h1>'+esc(log.session)+'</h1><p class="lift-sub">'+pretty(log.date)+' · Changes save as you train</p></div>'+timerHTML()+stageHTML(log,'warmup',warmups[day]||[['Easy warm-up','3 minutes'],['Ramp-up sets','2 sets']])+sections+stageHTML(log,'cooldown',cooldowns)+'<div class="field"><label>Notes</label><textarea rows="2" id="lift-notes" class="textfield" placeholder="Optional">'+esc(log.notes||'')+'</textarea></div><div class="actions"><button class="ghost" id="save-lift">Save draft</button><button class="solid" id="complete-lift">'+(log.finished?'Finished ✓':'Finish workout')+'</button></div>');
- document.getElementById('exit-lift').onclick=()=>go('today');
+ attachPhotoControls();document.getElementById('exit-lift').onclick=()=>go('today');
  document.getElementById('timer-toggle').onclick=()=>{if(timerUntil){timerRemaining=Math.ceil((timerUntil-Date.now())/1000);timerUntil=0}else{if(timerRemaining===0)timerRemaining=timerPreset;timerUntil=Date.now()+timerRemaining*1000}timerTick()};
  document.querySelectorAll('[data-timer]').forEach(b=>b.onclick=()=>{timerPreset=Number(b.dataset.timer);timerRemaining=timerPreset;timerUntil=0;render()});
  document.getElementById('timer-reset').onclick=()=>{timerUntil=0;timerRemaining=timerPreset;timerTick()};
@@ -148,12 +148,38 @@ const mobility=[
  ['Chest',10,[['Doorway stretch','2 × 30 sec'],['Wall slide','2 × 8'],['Thoracic rotation','2 × 6 each']]],
  ['Running durability',12,[['Straight-knee calf raise','2 × 12'],['Bent-knee calf raise','2 × 12'],['Tibialis raise','2 × 12'],['Single-leg balance','2 × 30 sec']]],
  ['Hips / ankles',12,[['90/90 transitions','2 × 6 each'],['Knee-to-wall ankle rocks','2 × 10 each'],['Split-squat hold','2 × 20 sec']]],
- ['Recovery flow',10,[['Easy walk','3 min'],['Cat-cow','8 reps'],['Gentle hip mobility','3 min']]]
+ ['Recovery flow',10,[['Easy walk','3 min'],['Cat-cow','8 reps'],['Gentle hip mobility','3 min']]],['Core stability',12,[['Dead bug','3 × 8 each'],['Side plank','2 × 30 sec each'],['Bird dog','2 × 8 each'],['Pallof press','2 × 10 each']]]
 ];
-function mobilityPage(){chrome('<div class="view-head"><div class="eyebrow">OPTIONAL SESSIONS</div><h1 class="title">Move better.</h1><p class="subtitle">Separate from strength and running.</p></div><div class="mobility-grid">'+mobility.map(([name,duration],i)=>'<button class="mobility-card" data-mob="'+i+'"><i>↗</i><div><b>'+name+'</b><span>'+duration+' min</span></div></button>').join('')+'</div>');document.querySelectorAll('[data-mob]').forEach(b=>b.onclick=()=>{page='routine';activeMobility=+b.dataset.mob;render()})}
+const photoMap={'Straight-knee calf raise':'Standing_Calf_Raises','Bent-knee calf raise':'Seated_Calf_Raise','Dead bug':'Dead_Bug','Side plank':'Side_Plank','Bird dog':'Bird_Dog','DB bench press':'Dumbbell_Bench_Press','Romanian deadlift':'Romanian_Deadlift_With_Dumbbells','Hammer curl':'Hammer_Curls','Scapular push-ups':'Scapular_Push-Up','Doorway stretch':'Doorway_Stretch','Hip flexor stretch':'Kneeling_Hip_Flexor'};
+let exerciseCatalog=null;
+async function showReference(button){
+ const place=button.nextElementSibling;
+ if(place.dataset.open==='yes'){place.replaceChildren();place.dataset.open='no';return}
+ place.textContent='Loading reference…';
+ try{
+  exerciseCatalog ||=fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json').then(r=>{if(!r.ok)throw Error('Unavailable');return r.json()}).catch(e=>{exerciseCatalog=null;throw e});
+  const all=await exerciseCatalog,name=button.dataset.exercise,alias=photoMap[name]||name;
+  const norm=s=>String(s).toLowerCase().replace(/[^a-z0-9]/g,'');
+  const ex=all.find(x=>norm(x.id)===norm(alias)||norm(x.name)===norm(alias));
+  place.replaceChildren();
+  if(ex?.images?.length){
+   const img=document.createElement('img');img.className='exercise-photo';img.loading='lazy';img.alt='Reference for '+ex.name;
+   img.src='https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/'+ex.images[0].split('/').map(encodeURIComponent).join('/');
+   img.onerror=()=>{place.textContent='Reference image unavailable.'};
+   const credit=document.createElement('small');credit.textContent='Free Exercise DB · '+ex.name+' (check variation)';
+   place.append(img,credit);
+  }else{
+   const a=document.createElement('a');a.href='https://www.youtube.com/results?search_query='+encodeURIComponent(name+' exercise demonstration');a.target='_blank';a.rel='noopener noreferrer';a.textContent='Find movement demonstration ↗';place.append(a);
+  }
+  place.dataset.open='yes';
+ }catch{place.textContent='References require an internet connection.'}
+}
+const photoControl=name=>'<div class="photo-control"><button type="button" class="photo-button" data-exercise="'+esc(name)+'">View demonstration</button><div class="photo-result"></div></div>';
+function attachPhotoControls(){document.querySelectorAll('[data-exercise]').forEach(b=>b.onclick=()=>showReference(b))}
+function mobilityPage(){chrome('<div class="view-head"><div class="eyebrow">OPTIONAL SESSIONS</div><h1 class="title">Move better.</h1><p class="subtitle">Separate from strength and running.</p></div><div class="mobility-grid">'+mobility.map(([name,duration],i)=>'<button class="mobility-card" data-mob="'+i+'"><i>'+['◉','≋','⌁','↔','◌','▰','⟡','☼','⊕'][i]+'</i><div><b>'+name+'</b><span>'+duration+' min</span></div></button>').join('')+'</div>');document.querySelectorAll('[data-mob]').forEach(b=>b.onclick=()=>{page='routine';activeMobility=+b.dataset.mob;render()})}
 function routinePage(){const m=mobility[activeMobility],date=selected,existing=data.mobility.find(x=>x.date===date&&x.program===m[0]);if(!m){go('mobility');return}
- chrome('<button id="backmob" class="ghost small">← Mobility</button><div class="view-head"><div class="eyebrow">MOBILITY · '+m[1]+' MIN</div><h1 class="title">'+m[0]+'</h1></div><div class="info-panel">'+m[2].map(([name,dose],i)=>'<label class="flow-item"><input type="checkbox" data-mstep="'+i+'" '+(existing?.checks?.includes(i)?'checked':'')+'><span>'+esc(name)+'<small>'+dose+'</small></span></label>').join('')+'</div><button class="solid" id="savemob">Save routine</button>');
- document.getElementById('backmob').onclick=()=>go('mobility');
+ chrome('<button id="backmob" class="ghost small">← Mobility</button><div class="view-head"><div class="eyebrow">MOBILITY · '+m[1]+' MIN</div><h1 class="title">'+m[0]+'</h1></div><div class="info-panel">'+m[2].map(([name,dose],i)=>'<label class="flow-item"><input type="checkbox" data-mstep="'+i+'" '+(existing?.checks?.includes(i)?'checked':'')+'><span>'+esc(name)+'<small>'+dose+'</small></span></label>'+photoControl(name)).join('')+'</div><button class="solid" id="savemob">Save routine</button>');
+ attachPhotoControls();document.getElementById('backmob').onclick=()=>go('mobility');
  document.getElementById('savemob').onclick=()=>{const checks=[...document.querySelectorAll('[data-mstep]:checked')].map(x=>+x.dataset.mstep);const item={id:date+'|'+m[0],date,program:m[0],checks,completed:checks.length===m[2].length,updated:new Date().toISOString()};const at=data.mobility.findIndex(x=>x.id===item.id);if(at>=0)data.mobility[at]=item;else data.mobility.push(item);save();go('mobility')}
 }
 function editRun(date,p){
