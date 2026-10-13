@@ -26,7 +26,7 @@ const icons={
 };
 function icon(id){return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[id]+'</svg>'}
 const nav=[['today','Today','today'],['calendar','Plan','calendar'],['history','History','history'],['progress','Progress','progress'],['mobility','Mobility','mobility'],['library','Library','settings']];
-function chrome(body){app.innerHTML='<div class="shell"><header class="top"><div class="brand"><div class="mark">↗</div><span>TRAINING LOG</span></div><div class="top-time" id="nowTime"></div></header><main class="main" id="main">'+body+'</main><nav class="bottom">'+nav.map(([id,label,symbol])=>'<button data-page="'+id+'" class="'+(page===id?'active':'')+'" aria-label="'+label+'">'+icon(symbol)+'<span>'+label+'</span></button>').join('')+'</nav></div>';document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));clock()}
+function chrome(body){app.innerHTML='<div class="shell"><header class="top"><div class="brand"><div class="mark"><svg viewBox="0 0 48 48" aria-label="Training Log logo" role="img"><circle cx="31" cy="15" r="9" fill="#fd9452"/><path d="M4 37 20 14 28 27 33 21 45 37H4Z" fill="#fff8ed"/><path d="m13 37 7-12 6 12h-6l-2-5-3 5z" fill="#31574c"/><path d="m30 37 6-9 9 9H30Z" fill="#baefd1"/></svg></div><span>TRAINING LOG</span></div><div class="top-time" id="nowTime"></div></header><main class="main" id="main">'+body+'</main><nav class="bottom">'+nav.map(([id,label,symbol])=>'<button data-page="'+id+'" class="'+(page===id?'active':'')+'" aria-label="'+label+'">'+icon(symbol)+'<span>'+label+'</span></button>').join('')+'</nav></div>';document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));clock()}
 function clock(){const n=document.getElementById('nowTime');if(n)n.textContent=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'}).format(new Date())}
 setInterval(clock,30000);
 function go(next){page=next;detail=null;activeLift=null;activeMobility=null;render();scrollTo(0,0)}
@@ -133,13 +133,13 @@ function liftPage(){
  document.getElementById('timer-toggle').onclick=()=>{if(timerUntil){timerRemaining=Math.ceil((timerUntil-Date.now())/1000);timerUntil=0}else{if(timerRemaining===0)timerRemaining=timerPreset;timerUntil=Date.now()+timerRemaining*1000}timerTick()};
  document.querySelectorAll('[data-timer]').forEach(b=>b.onclick=()=>{timerPreset=Number(b.dataset.timer);timerRemaining=timerPreset;timerUntil=0;render()});
  document.getElementById('timer-reset').onclick=()=>{timerUntil=0;timerRemaining=timerPreset;timerTick()};
- document.querySelectorAll('[data-field]').forEach(input=>input.addEventListener('change',()=>{const s=log.exercises[+input.dataset.e].sets[+input.dataset.s];s[input.dataset.field]=input.type==='checkbox'?input.checked:Math.max(0,Number(input.value));save()}));
+ document.querySelectorAll('[data-field]').forEach(input=>input.addEventListener(input.type==='checkbox'?'change':'input',()=>{const s=log.exercises[+input.dataset.e].sets[+input.dataset.s];s[input.dataset.field]=input.type==='checkbox'?input.checked:Math.max(0,Number(input.value));save()}));
  document.querySelectorAll('[data-stage]').forEach(input=>input.onchange=()=>{const a=log.stages[input.dataset.stage]||[];const i=Number(input.dataset.index);log.stages[input.dataset.stage]=input.checked?[...new Set([...a,i])]:a.filter(x=>x!==i);save()});
  const addExercise=document.createElement('button');addExercise.className='ghost';addExercise.textContent='+ Add exercise';addExercise.id='add-from-library';document.querySelector('.exercise-box:last-of-type')?.after(addExercise);addExercise.onclick=()=>chooseLibrary(null);
  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const e=log.exercises[+b.dataset.add],last=e.sets.at(-1);e.sets.push({...last,done:false});save();render()});
  document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{const e=log.exercises[+b.dataset.remove];if(e.sets.length>1){if(e.sets.at(-1).done&&!confirm('Remove a completed set?'))return;e.sets.pop();save();render()}});
  document.querySelectorAll('[data-replace]').forEach(b=>b.onclick=()=>chooseLibrary(Number(b.dataset.replace)));
- document.getElementById('lift-notes').onchange=e=>{log.notes=e.target.value;save()};
+ document.getElementById('lift-notes').oninput=e=>{log.notes=e.target.value;save()};
  document.getElementById('save-lift').onclick=()=>go('today');
  document.getElementById('complete-lift').onclick=()=>{if(!log.exercises.some(e=>e.sets.some(s=>s.done)))return alert('Mark at least one completed set.');log.finished=true;save();go('today')}
 }
@@ -208,7 +208,7 @@ function openExercise(name){
 function applyLibraryExercise(name){
  const intent=libraryMode;const log=data.lifts.find(x=>x.id===intent?.logId);if(!log)return alert('Workout unavailable. Return to your session.');
  const i=intent.replace;
- const replacement={name,category:exercises.find(x=>x.name===name)?.group||'',tip:'',sets:Array.from({length:i===null?3:Math.max(1,log.exercises[i]?.sets.length||3)},(_,j)=>({weight:priorSet(name,log.date)?.weight??0,reps:i===null?8:log.exercises[i].sets[j]?.reps??8,done:false}))};
+ const replacement={name,category:exercises.find(x=>x.name===name)?.group||'',tip:'',sets:Array.from({length:i===null?3:Math.max(1,log.exercises[i]?.sets.length||3)},(_,j)=>({weight:priorSet(name,log.date)?.weight??0,reps:i===null?8:(log.exercises[i]?.sets[j]?.reps??8),done:false}))};
  if(i!==null){if(log.exercises[i].sets.some(s=>s.done)&&!confirm('Replacing this exercise will discard its completed sets. Continue?'))return;log.exercises[i]=replacement}
  else log.exercises.push(replacement);
  if(!save())return;
@@ -272,4 +272,5 @@ function settingsPage(){
  document.getElementById('push').onclick=()=>git(false);document.getElementById('pull').onclick=()=>git(true)
 }
 function render(){if(page==='today')todayPage();else if(page==='calendar')calendarPage();else if(page==='lift')liftPage();else if(page==='run')editRun(selected,planned('run',selected));else if(page==='history')historyPage();else if(page==='progress')progressPage();else if(page==='mobility')mobilityPage();else if(page==='library')libraryPage();else if(page==='routine')routinePage();else settingsPage()}
+window.addEventListener('pagehide',()=>save());
 render();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
