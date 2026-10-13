@@ -221,3 +221,20 @@ html,body{background:#20252a;color:#f5f5f2}
 .history-exercise>strong{font-size:13px;display:block;margin-bottom:7px}
 .history-set{display:flex;justify-content:space-between;gap:12px;color:#dae3df;font-size:12px;padding:7px 0;border-bottom:1px solid #526168}
 .history-set:last-child{border-bottom:0}
+
+/* Dedicated muscle-group exercise library */
+.lib-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;margin:15px 0}
+.lib-filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:13px 0}
+.lib-filters label{font-size:11px;color:#d1ded9;display:flex;flex-direction:column;gap:6px;font-weight:750}
+.lib-results{border:1px solid #4e5d61;background:#30383d;border-radius:16px;overflow:hidden}
+.lib-item{display:flex;width:100%;gap:12px;justify-content:space-between;align-items:center;background:transparent;border:0;border-bottom:1px solid #4b555a;color:#f4f6f4;text-align:left;padding:15px 17px;min-height:66px}
+.lib-item:last-child{border-bottom:0}
+.lib-item:focus-visible{outline-offset:-4px}
+.lib-item-main{display:flex;flex-direction:column;gap:6px;min-width:0}
+.lib-item-main strong{font-size:14px;line-height:1.2;color:#fff}
+.lib-item-main small{color:#c4d2cd;font-size:12px}
+.lib-arrow{font-size:22px;color:#ffc195}
+.lib-context{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 15px;background:#43544e;border-radius:12px;margin:12px 0}
+.lib-context strong{font-size:13px;color:#effff5}
+.photo-button{font-size:12px;min-height:36px}
+@media(max-width:380px){.lib-head{grid-template-columns:1fr}.lib-filters{grid-template-columns:1fr}}
