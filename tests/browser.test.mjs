@@ -77,3 +77,16 @@ test('font and backgrounds remain readable without layered themes',async()=>{
  assert.equal(styles.stylesheets,1);
  await page.close();
 });
+
+test('history expands saved strength session into completed weights and reps',async()=>{
+ const {page,errors}=await newPage();
+ await page.getByRole('button',{name:/Open workout/}).click();
+ await page.locator('[data-field="weight"]').first().fill('45');
+ await page.locator('[data-field="weight"]').first().dispatchEvent('change');
+ await page.locator('[data-field="done"]').first().check();
+ await page.locator('[data-page="history"]').click();
+ await page.locator('.history-entry').first().locator('summary').click();
+ assert.match(await page.locator('.history-detail').first().innerText(),/45 lb/);
+ assert.deepEqual(errors,[]);
+ await page.close();
+});
