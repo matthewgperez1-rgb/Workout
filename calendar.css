@@ -1,0 +1,26 @@
+/* Calendar release: visual language borrowed conceptually from modern training calendars:
+   clear chronological grouping, sessions as independent objects, one action per card.
+   No third-party code or artwork. */
+.t7-calendar{max-width:760px;margin:0 auto}
+.t7-calhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.t7-calhead h2{font-size:25px;letter-spacing:-.045em;color:#17211c!important;margin:0}
+.t7-buttons{display:flex;gap:4px;flex-shrink:0}
+.t7-buttons button{min-height:38px;padding:8px 12px;border-radius:10px}
+.t7-days{display:grid;gap:10px}
+.t7-day{display:grid;grid-template-columns:82px minmax(0,1fr);gap:12px;padding:12px 14px;background:#fff;border:1px solid #e0e6e2;border-radius:16px;align-items:start;min-width:0}
+.t7-daydate{font-size:12px;font-weight:740;color:#64716b;padding-top:11px}
+.t7-slots{display:grid;gap:7px;min-width:0}
+.t7-slot{width:100%;min-width:0;min-height:60px;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:4px;background:#eef7f1!important;border:1px solid #c9ded1!important;color:#17211c!important;border-radius:12px;padding:11px 14px!important}
+.t7-slot span{font-size:10px;letter-spacing:.11em;font-weight:850;color:#226958}
+.t7-slot strong{font-size:14px;font-weight:740;color:#17211c!important;line-height:1.25}
+.t7-slot small{color:#526e5b;font-size:12px}
+.t7-slot:has(span:first-child)~.t7-slot{background:#fff3e8!important;border-color:#f0d3b7!important}
+.t7-slot:has(span:first-child)~.t7-slot span{color:#a15b24}
+.t7-rest{display:block;font-size:12px;color:#8b938e;padding:16px 2px}
+.t7-movement{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;border-bottom:1px solid #e0e6e2;font-size:14px;color:#17211c}
+.t7-movement b{color:#246a52;white-space:nowrap}
+.t7-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.t7-options button{min-height:50px;padding:10px;font-size:13px}
+.t7-options button:disabled{opacity:.4}
+.t7-calendar .t7-day:has(.t7-slot):hover{border-color:#b9cec2}
+@media(max-width:500px){.t7-calhead h2{font-size:21px}.t7-buttons button{padding:7px 9px}.t7-day{grid-template-columns:64px minmax(0,1fr);padding:11px;gap:8px}.t7-slot{padding:10px!important}.t7-slot strong{font-size:13px}}
