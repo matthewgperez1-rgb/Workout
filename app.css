@@ -15,3 +15,6 @@
 
 /* Planned run parts use the existing accessible phone layout. */
 .planned-run>h3{margin-bottom:12px}.planned-part{padding:18px 0;border-bottom:1px solid var(--line)}.planned-part>.note{margin:8px 0 14px}.planned-part>.field{margin-bottom:10px}.planned-part>.flow-panel{margin-top:12px}.planned-part .pill{flex-shrink:0}.planned-run .run-preview .run-preview{padding:0;background:none;border:0}#part-summary{margin-top:18px}.planned-part .row-between{gap:12px}
+
+/* Weekly training comparisons and cardio quick logging */
+.weekly-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.weekly-metrics .metric:first-child{grid-column:span 2}.weekly-delta{font-size:10px;margin-top:7px;color:var(--muted);font-weight:700}.weekly-delta.up{color:var(--lime)}.weekly-delta.down{color:#ff7272}.weekly-delta.flat{color:var(--muted)}.cardio-quick{margin:0 0 16px}.cardio-quick .button{min-width:0}@media(min-width:700px){.weekly-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.weekly-metrics .metric:first-child{grid-column:auto}}
