@@ -1,3 +1,4 @@
+import {validateWorkout,hasRecordedParts} from './run-logging.mjs';
 import {validDate,stamp} from './dates.mjs';
 export const KEY='rangeboard_v2';
 export const fresh=()=>({schema:2,lifts:[],runs:[],mobility:[],measurements:[],moves:{lift:{},run:{}},moveState:{lift:{},run:{}},resolutions:{},overrides:{},notes:{},conflicts:[],audit:[],customExercises:[],updated:null});
@@ -8,7 +9,7 @@ export function validateData(v){
  for(const key of ['mobility','measurements','conflicts','audit','customExercises'])if(v[key]!==undefined&&!Array.isArray(v[key]))throw Error(`Invalid ${key} list.`);
  for(const l of v.lifts){if(!object(l)||!validDate(l.date)||typeof l.session!=='string'||!Array.isArray(l.exercises))throw Error('Invalid lifting record.');for(const e of l.exercises){if(!object(e)||typeof e.name!=='string'||!Array.isArray(e.sets))throw Error('Invalid exercise record.');for(const s of e.sets)if(!object(s)||!number(s.weight??0)||!number(s.reps??0)||typeof s.done!=='boolean'||s.kind!==undefined&&!['warmup','working'].includes(s.kind))throw Error('Invalid completed-set data.');}}
  for(const r of v.measurements||[])if(!object(r)||!validDate(r.date)||(r.weight!=null&&(!number(r.weight)||Number(r.weight)<=0))||(r.waist!=null&&(!number(r.waist)||Number(r.waist)<=0))||(r.weightUnit!==undefined&&!['lb','kg'].includes(r.weightUnit)))throw Error('Invalid body measurement.');
- for(const r of v.runs)if(!object(r)||!validDate(r.date)||!number(r.distance)||Number(r.distance)<=0||!Number.isInteger(Number(r.minutes))||Number(r.minutes)<0||!Number.isInteger(Number(r.seconds??0))||Number(r.seconds??0)<0||Number(r.seconds??0)>59||Number(r.minutes)*60+Number(r.seconds??0)<=0)throw Error('Invalid run distance or elapsed time.');
+ for(const r of v.runs){if(!object(r)||!validDate(r.date))throw Error('Invalid run date.');if(r.workout)validateWorkout(r.workout);if(r.totalsComplete===false){if(r.distance!==0||r.minutes!==0||r.seconds!==0||!hasRecordedParts(r.workout))throw Error('A run without totals must contain recorded planned parts.');}else if(!number(r.distance)||Number(r.distance)<=0||!Number.isInteger(Number(r.minutes))||Number(r.minutes)<0||!Number.isInteger(Number(r.seconds??0))||Number(r.seconds??0)<0||Number(r.seconds??0)>59||Number(r.minutes)*60+Number(r.seconds??0)<=0)throw Error('Invalid run distance or elapsed time.');}
  for(const e of v.customExercises||[])if(!object(e)||typeof e.id!=='string'||typeof e.name!=='string'||typeof e.group!=='string'||typeof e.equipment!=='string'||typeof e.pattern!=='string'||!['reps','sec','m','min'].includes(e.unit)||!Array.isArray(e.steps)||!e.steps.length||e.steps.some(s=>typeof s!=='string'))throw Error('Invalid custom exercise.');
  if(v.overrides)for(const p of Object.values(v.overrides))if(!object(p)||typeof p.name!=='string'||!Array.isArray(p.moves)||p.moves.some(m=>!Array.isArray(m)||typeof m[0]!=='string'||!number(m[1])||!number(m[2])))throw Error('Invalid workout override.');
  for(const r of v.mobility||[])if(!object(r)||!validDate(r.date)||typeof r.program!=='string'||(r.checks!==undefined&&!Array.isArray(r.checks)))throw Error('Invalid mobility record.');
@@ -42,3 +43,4 @@ export class TrainingStore {
  audit(kind,record,reason){if(!this.snapshot(reason))return false;this.data.audit.push({at:stamp(),kind,reason,before:structuredClone(record)});return true;}
  import(value){const next=normalize(value);if(!this.snapshot('Before import'))throw Error(this.error);const m=mergeData(this.data,next);this.data=m.data;if(!this.save())throw Error(this.error);return m;}
 }
+

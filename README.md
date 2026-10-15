@@ -1,4 +1,4 @@
-Current update: **3.1.0**. See [3.1 release notes](docs/RELEASE-3.1.md) for profile/bodyweight trends and gym logging improvements. Existing schema-2 records are retained.
+Current update: **3.2.0**. See [3.2 release notes](docs/RELEASE-3.2.md) for the PPLPP split, PFT pull-up focus, and exact planned run-part logging. Existing schema-2 records are retained.
 
 # Training Log
 
@@ -8,9 +8,9 @@ A personal, phone-first strength, running and mobility PWA. Hosted at https://ma
 
 Open Today for the next lift and the independently planned run. During lifting, enter load and reps/time/distance, check a completed set, and use the persistent 60/90/120-second timer. Add exercises or substitute remaining work from the library; previously completed sets stay in the session. Optional warm-up, cooldown and nine targeted mobility routines are independent of the required lift.
 
-Garmin records the run. Enter distance and elapsed time afterwards; average pace is calculated. Heart rate, cadence, effort and notes are optional. There is no Garmin connection or live GPS tracking.
+Garmin records the run. For a planned workout, enter the times for completed work parts in its prebuilt structure. Repeat distances and recovery targets are already included. Uncompleted parts stay blank; planned recovery is never claimed as measured. A timed part can be explicitly marked completed as planned. Session miles and elapsed time are optional when parts are recorded, with missing totals shown as missing. Easy/free runs can still use distance and elapsed time. Work-only results are shown separately from session average pace. Heart rate, cadence, effort and notes are optional. There is no Garmin connection or live GPS tracking.
 
-Plan shows strength and running separately, preserves original Tredict identifiers, and supports multiple sessions per day. Move an unstarted session to any valid date. Recovery warnings flag congestion or nearby demanding leg work; they do not automatically redistribute training or claim injury prevention. Four regular lift days and an optional fifth remain the baseline. New lifts in weeks 4/8/12 use fewer non-power working sets; existing logs are never rewritten.
+Plan shows strength and running separately, preserves original Tredict identifiers, and supports multiple sessions per day. Move an unstarted session to any valid date. Recovery warnings flag congestion or nearby demanding leg work; they do not automatically redistribute training or claim injury prevention. From October 15, the baseline is Push A / Pull A / Legs, with Push B and Pull B as the fourth/fifth sessions. Saturday is optional independent mobility; Sunday is recovery. The original split remains available for past dates, and started logs keep their own exercises. New lifts in weeks 4/8/12 use fewer non-power working sets; existing logs are never rewritten.
 
 History exposes completed sets and run details. Correcting a completed record preserves a recovery snapshot and an audit entry. Progress contains actual exercise load/reps/volume trends and run distance/pace/HR records, with honest empty states. Timed and distance work is not presented as repetition volume.
 
@@ -28,7 +28,7 @@ Connect and choose manual backup, or opt into backup while this app session is o
 
 ## Program and dates
 
-program.mjs retains the original strength templates and all 32 static Tredict sessions, October 12–December 5, 2026. No later running plan is invented. Original Tredict calendar moves are not changed remotely. Device-local date is default; Settings supports explicit timezones. Stored training dates never shift during travel or midnight rollover.
+program.mjs preserves the earlier strength templates for history and all 32 retained Tredict sessions, October 12–December 5, 2026. No later running plan is invented. The October 15 speed session retains its source identity and defaults to October 14, matching the corrected Tredict calendar. The exact structured steps and recovery targets for all 32 retained workouts are snapshotted in modules/run-workouts.mjs. Other app moves do not change Tredict remotely. Device-local date is default; Settings supports explicit timezones. Stored training dates never shift during travel or midnight rollover.
 
 ## Development
 
@@ -42,3 +42,4 @@ Production uses buildless ES modules and one coherent stylesheet. modules/ conta
 - `node scripts/build.mjs` emits the complete production dist/.
 
 GitHub QA checks the review branch and main. Pages publishes the exact tested main commit. QA artifacts include mobile browser captures at 360/390/430px. See docs/design/DECISIONS.md and docs/RELEASE-QA.md for design intent and verification limits. Passing automation does not establish physical iPhone or human gym-session acceptance.
+
