@@ -1,4 +1,4 @@
-const CACHE='training-log-v3.2.0';
+const CACHE='training-log-v3.2.1';
 const CORE=['./','./index.html','./app.css','./app.mjs','./program.mjs','./exercise-library.mjs','./icon.svg','./manifest.webmanifest','./modules/dates.mjs','./modules/store.mjs','./modules/schedule.mjs','./modules/exercises.mjs','./modules/analytics.mjs','./modules/timer.mjs','./modules/backup.mjs','./modules/ui.mjs','./modules/views.mjs','./modules/training.mjs','./modules/run-workouts.mjs','./modules/run-logging.mjs','./modules/run-ui.mjs','./assets/fonts/SpaceGrotesk.ttf','./assets/fonts/Manrope.ttf','./assets/icon-180.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-maskable.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)));});
 self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE_UPDATE')self.skipWaiting();});

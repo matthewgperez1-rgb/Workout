@@ -1,3 +1,5 @@
+Current update: **3.2.1** adds optional Sunday active recovery and seven stretching routines under Mobility. Existing history and lifting/running schedules are retained.
+
 Current update: **3.2.0**. See [3.2 release notes](docs/RELEASE-3.2.md) for the PPLPP split, PFT pull-up focus, and exact planned run-part logging. Existing schema-2 records are retained.
 
 # Training Log
