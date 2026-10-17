@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {fresh,normalize,validateData,mergeData,resolveConflict,TrainingStore,KEY} from '../modules/store.mjs';
 import {localDate,plus,weekStart,validDate,pace} from '../modules/dates.mjs';
-import {scheduleAt,moveSession,logFor,warningsAt,blockPhase} from '../modules/schedule.mjs';
+import {scheduleAt,moveSession,logFor,warningsAt,blockPhase,recoveryWeek} from '../modules/schedule.mjs';
 import {profile,catalog,measurementFor,mobility} from '../modules/exercises.mjs';
 import {weekly,exerciseTrend,suggestion} from '../modules/analytics.mjs';
 import {RestTimer} from '../modules/timer.mjs';
@@ -42,3 +42,18 @@ test('set types, profile and setup are additive; old records survive save/export
 
 test('progression separates load/rep conventions and bodyweight chart spaces actual calendar days',async()=>{const {weightChart}=await import('../modules/training.mjs');const data=fresh();for(const [date,basis] of [['2026-10-01','total'],['2026-10-08','per-hand'],['2026-10-12','per-hand']])data.lifts.push({id:date,date,session:'Lift',finished:true,exercises:[{name:'DB bench press',exerciseId:profile('DB bench press').id,loadBasis:basis,unit:'reps',sets:[{weight:30,reps:10,done:true}]}]});assert.equal(exerciseTrend(data,profile('DB bench press').id,'DB bench press').length,2);const svg=weightChart([{date:'2026-10-01',value:185},{date:'2026-10-02',value:184},{date:'2026-10-11',value:184.5}],'lb');assert.match(svg,/cx="70.4"/);assert.match(svg,/2026-10-02/);assert.match(svg,/184.0/);});
 
+
+test('twelve training weeks alternate with one shared running and strength recovery week',()=>{
+ const d=fresh();
+ assert.equal(recoveryWeek('2026-12-28'),false);
+ assert.equal(recoveryWeek('2027-01-04'),true);
+ assert.equal(recoveryWeek('2027-01-10'),true);
+ assert.equal(recoveryWeek('2027-01-11'),false);
+ assert.equal(recoveryWeek('2027-04-05'),true);
+ assert.equal(scheduleAt(d,'lift','2027-01-04').length,0);
+ assert.ok(scheduleAt(d,'lift','2027-01-11').length>0);
+ assert.match(warningsAt(d,'2027-01-04').join(' '),/Recovery week/);
+ d.lifts.push({id:'kept-session',planId:'lift:2027-01-04',sourceDate:'2027-01-04',date:'2027-01-04',session:'Previously started',finished:true,exercises:[{name:'DB bench press',sets:[{weight:25,reps:8,done:true}]}]});
+ assert.equal(scheduleAt(d,'lift','2027-01-04').length,1);
+ assert.equal(d.lifts.length,1);
+});
