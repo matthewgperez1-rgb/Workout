@@ -42,7 +42,7 @@ try {
     await page.screenshot({ path: 'qa-production/live-' + name.toLowerCase() + '-390.png', fullPage: true });
   }
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  assert.match(await page.locator('main').innerText(), /3[.]2[.]4/);
+  assert.match(await page.locator('main').innerText(), /3[.]2[.]5/);
   await page.screenshot({ path: 'qa-production/live-settings-390.png', fullPage: true });
   assert.deepEqual(errors, []);
   console.log('Production navigation, version, mobile layout and JavaScript smoke checks passed.');
