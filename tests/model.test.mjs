@@ -57,3 +57,10 @@ test('twelve training weeks alternate with one shared running and strength recov
  assert.equal(scheduleAt(d,'lift','2027-01-04').length,1);
  assert.equal(d.lifts.length,1);
 });
+
+test('rest instructions do not turn pull-up repetitions into time',()=>{
+ assert.equal(measurementFor({name:'Pull-up',tip:'Start 2 reps/set; rest 2 minutes.'}),'reps');
+ assert.equal(measurementFor({name:'Pull-up',tip:'rest 90–120 seconds'}),'reps');
+ assert.equal(measurementFor({name:'Farmer carry',tip:'Seconds; tall posture'}),'sec');
+ assert.equal(measurementFor({name:'Custom hold',unit:'sec'}),'sec');
+});
