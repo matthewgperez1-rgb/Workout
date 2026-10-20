@@ -42,7 +42,8 @@ try {
     await page.screenshot({ path: 'qa-production/live-' + name.toLowerCase() + '-390.png', fullPage: true });
   }
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  assert.match(await page.locator('main').innerText(), /3[.]2[.]5/);
+  const expectedVersion = (await readFile('dist/sw.js', 'utf8')).match(/const CACHE='training-log-v([^']+)'/)[1];
+  assert.ok((await page.locator('main').innerText()).includes(expectedVersion), 'Settings must show the tested release version');
   await page.screenshot({ path: 'qa-production/live-settings-390.png', fullPage: true });
   assert.deepEqual(errors, []);
   console.log('Production navigation, version, mobile layout and JavaScript smoke checks passed.');
@@ -51,4 +52,5 @@ try {
 } finally {
   await browser.close();
 }
+
 
