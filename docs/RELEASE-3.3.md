@@ -1,0 +1,9 @@
+# Training Log 3.3.0
+
+The remaining CFT 880 block now follows Monday easy, Tuesday speed, Wednesday legs, Thursday rest, Friday lighter speed, Saturday long, Sunday rest. This replaces the former Thursday/Friday quality pairing for unstarted sessions October 26–December 5. Thursday's optional Push B moves to Saturday. Existing started/completed sessions retain their identity, exercises, splits and actual dates.
+
+October 23–25 is recovery only. The return week uses reduced running and two working sets without jumps for new lifts. Later quality sessions vary pyramids, ladders, fartlek, mixed-distance sets, relaxed speed, benchmarking and sharpening. Goal splits are references only; current fitness and recovery determine effort. Saturday long runs remain conversational and may be shortened/skipped after Friday fatigue. The shared recurring recovery week remains in place.
+
+All 24 revised workouts have matching structured distance/time/recovery steps in Training Log and the Tredict reusable block. Tredict supports whole meters, so the watch target rounds 880 yards to 805 meters; a measured 880-yard course determines the actual test finish. The replacement Tredict plan is in My Plans and must be applied starting October 26 after replacing the old future calendar block. Creating it did not alter the existing Tredict calendar. An incomplete earlier draft must also be removed during calendar cleanup.
+
+Validation: 51 model/domain/scheduling tests and 28 Chromium phone/browser tests pass locally, including all six remaining weeks, partial pyramid logging, existing-record preservation, new calendar rendering and the fatigue reset. Local WebKit could not launch because host libraries are unavailable; GitHub QA installs these dependencies and must pass before deployment. The service worker cache and displayed version are 3.3.0.

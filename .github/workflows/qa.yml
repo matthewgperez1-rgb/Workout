@@ -24,7 +24,7 @@ jobs:
           node --check app.mjs
           node --check sw.js
           for file in modules/*.mjs; do node --check "$file"; done
-          node --test tests/model.test.mjs tests/domain.test.mjs tests/training-core.test.mjs
+          node --test tests/model.test.mjs tests/domain.test.mjs tests/training-core.test.mjs tests/run-plan.test.mjs
           node scripts/build.mjs
       - name: Install mobile browser engines
         run: |
