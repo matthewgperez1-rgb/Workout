@@ -1,4 +1,5 @@
 import {runWorkouts} from './run-workouts.mjs';
+import {revisedWorkouts} from './run-plan.mjs';
 export const timeText=s=>s==null?'—':Math.floor(Math.round(s*10)/10/60)+':'+String(Math.round(s*10)/10%60).padStart(2,'0');
 export function parseTime(value) {
  if(!String(value??'').trim())return null;
@@ -10,7 +11,7 @@ export function expandWorkout(plan) {
  if(!plan?.steps)return [];const out=[];let work=0,recovery=0;
  function visit(steps,path='') {for(let i=0;i<steps.length;i++){const s=steps[i],key=path+i;if(s.type==='WorkoutRepeatStep'){for(let r=0;r<s.repeatValue;r++)visit(s.steps,key+'.'+r+'.');continue;}const intensity=s.intensity||'INTERVAL';const label=intensity==='WARMUP'?'Warm-up':intensity==='COOLDOWN'?'Cooldown':intensity==='RECOVERY'?'Recovery '+(++recovery):'Work '+(++work);out.push({key,label,intensity,durationType:s.durationType,durationValue:s.durationValue,description:s.description||'',actualSeconds:null,actualDistanceMeters:null});}}visit(plan.steps);return out;
 }
-export function planFor(id){return runWorkouts[id]||null;}
+export function planFor(id){return revisedWorkouts[id]||runWorkouts[id]||null;}
 export function partsFromInputs(planId,rows,saved){const plan=planFor(planId);if(!plan&&!saved)return null;const steps=(saved?.steps||expandWorkout(plan)).map(s=>{const r=rows.find(x=>x.key===s.key)||{},actualSeconds=parseTime(r.time),raw=String(r.distance??'').trim(),dist=raw===''?null:Number(raw);if(dist!==null&&!(Number.isFinite(dist)&&dist>0&&dist<=100000))throw Error('Part distance must be positive.');return {...s,actualSeconds,actualDistanceMeters:dist!==null?(s.durationType==='TIME'?dist*1609.344:dist):actualSeconds&&s.durationType==='DISTANCE'?s.durationValue:null};});return {planId,title:saved?.title||plan.workoutName,steps};}
 export function validateWorkout(w){if(!w||typeof w!=='object'||typeof w.planId!=='string'||!Array.isArray(w.steps)||w.steps.length>200)throw Error('Invalid structured run.');const keys=new Set();for(const s of w.steps){if(!s||typeof s.key!=='string'||keys.has(s.key)||!['WARMUP','COOLDOWN','RECOVERY','INTERVAL','REST','ACTIVE'].includes(s.intensity)||!['TIME','DISTANCE','OPEN'].includes(s.durationType)||!Number.isFinite(s.durationValue)||s.durationValue<0)throw Error('Invalid planned run part.');keys.add(s.key);for(const k of ['actualSeconds','actualDistanceMeters'])if(s[k]!==null&&s[k]!==undefined&&!(typeof s[k]==='number'&&Number.isFinite(s[k])&&s[k]>0&&s[k]<=100000))throw Error('Invalid recorded run part.');}if(!w.steps.some(s=>s.actualSeconds||s.actualDistanceMeters))throw Error('Record at least one completed part, or enter session totals.');return w;}
 export function hasRecordedParts(w){return !!w?.steps?.some(s=>s.actualSeconds||s.actualDistanceMeters);}
